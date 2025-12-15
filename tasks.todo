@@ -1,0 +1,19 @@
+### Tasks
+☐ Create blank canvas
+☐ Place dot at cursor location when left-clicking
+☐ Dot interactable behavior
+    ☐  make dot red when hovered, go back to black when moving mouse away
+    ☐  make dot blue when clicked, go back to black when clicking elsewhere
+
+Learn:
+    ☐ DOM basics + element creation
+    ☐ Mouse event handling
+        ☐  click
+        ☐  hover 
+        ☐  drag
+        ☐  mouse position
+    ☐ CSS positioning & styling
+    ☐ Managing an array of interactive dots
+    ☐ saving dot data locally
+        ☐  localStorage
+        ☐  Node.js, SQL DB
