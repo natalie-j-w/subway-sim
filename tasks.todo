@@ -6,7 +6,7 @@
     ☐  make dot blue when clicked, go back to black when clicking elsewhere
 
 Learn:
-    ☐ DOM basics + element creation
+    ☐ DOM basics
     ☐ Mouse event handling
         ☐  click
         ☐  hover 
