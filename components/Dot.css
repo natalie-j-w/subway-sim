@@ -1,0 +1,14 @@
+#circle {
+    width : var(--dot-size);
+    height : var(--dot-size);
+    background-color : var(--dot-color);
+    border-style: solid;
+    border-width: 3px;
+    border-color: var(--dot-border-color);
+    border-radius : 50%;
+    position : absolute;
+    z-index : 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
