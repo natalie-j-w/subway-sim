@@ -1,4 +1,4 @@
-#circle {
+.stationDot {
     width : var(--dot-size);
     height : var(--dot-size);
     background-color : var(--dot-color);
@@ -11,4 +11,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: grab;
+}
+
+.stationDot:hover {
+    border-color: darkblue;
+}
+
+.stationDot.selected {
+    border-color: red;
+}
+
+.stationDot.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
 }

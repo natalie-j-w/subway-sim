@@ -1,4 +1,4 @@
-html {
+:root {
     --dot-size: 20px;
     --dot-color: white;
     --dot-border-color: blue;
