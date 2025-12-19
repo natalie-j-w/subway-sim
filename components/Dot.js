@@ -3,7 +3,7 @@ export class Dot {
         this.x = x;
         this.y = y;
         this.id = id || null;
-        this.name = name || '';
+        this.name = name || 'Name';
         this.connections = [];
 
         this.element = this.createDOMElement();

@@ -4,8 +4,8 @@
     --dot-border-color: blue;
 }
 
-#outer {
+#canvas {
     height: 250px;
     width: 500px;
-    background-color: aquamarine;
+    background-color: rgb(253, 255, 127);
 }
