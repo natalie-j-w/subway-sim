@@ -31,15 +31,16 @@ canvas.addEventListener('click', e => {
 addDotListener('click', canvas, (e, dot) => {
     // Single click to see data
     if (e.detail == 1) {
-        console.log("Clicked dot", dot.x, dot.y, dot.name);
+        console.log("Clicked dot", dot.x, dot.y, dot.getName());
     }
 
     // Double click to change data
     if (e.detail == 2) {
-        const curr_name = dot.name;
-        const new_name = prompt("Station name:");
-        dot.name = (new_name) ? new_name : curr_name;
-        console.log("Previous name:", curr_name ,"New name:", dot.name)
+        const curr_name = dot.getName();
+        const new_name_prompt = prompt("Station name:");
+        const new_name = (new_name_prompt) ? new_name_prompt : curr_name;
+        dot.setName(new_name);
+        console.log("Previous name:", curr_name ,"New name:", dot.getName())
     }
 })
 

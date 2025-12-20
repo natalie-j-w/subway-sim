@@ -1,15 +1,23 @@
-import {CSS_VARS} from '../constants.js'
+import {JS_VARS, CSS_VARS} from '../constants.js'
 
 export class Dot {
+    x;
+    y;
+    showNameLabel;
+    id;
+    #name;
+    connections;
+
     constructor(x, y, id, name) {
         this.x = x;
         this.y = y;
         this.showNameLabel = true;
         this.id = id || null;
-        this.name = name || 'Unnamed';
+        this.#name = name || 'Unnamed';
         this.connections = [];
 
         this.element = this.createDOMElement();
+        this.label;
         this.element.dotInstance = this;
     }
 
@@ -26,20 +34,36 @@ export class Dot {
     }
 
     createDOMElement() {
-        const new_dot = document.createElement('div');
+        const dot = document.createElement('div');
         const label = document.createElement('div');
-        new_dot.className = CSS_VARS.DOT_CLASSNAME;
+        dot.className = CSS_VARS.DOT_CLASSNAME;
         label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
+
+        this.label = label;
+        label.textContent = this.#name;
 
         const size = parseFloat(
             getComputedStyle(document.documentElement)
                 .getPropertyValue('--dot-size')
         );
 
-        new_dot.style.position = 'absolute';
-        new_dot.style.left = `${this.x - size / 2}px`;
-        new_dot.style.top  = `${this.y - size / 2}px`;
+        dot.style.position = 'absolute';
+        dot.style.left = `${this.x - size / 2}px`;
+        dot.style.top  = `${this.y - size / 2}px`;
 
-        return new_dot;
+        dot.appendChild(label);
+        return dot;
+    }
+
+    getName() {
+        return this.#name;
+    }
+
+    setName(new_name) {
+        if (new_name.length > JS_VARS.DOT_NAME_MAXLENGTH) {
+            throw (`Station name max length: ${JS_VARS.DOT_NAME_MAXLENGTH} characters`)
+        }
+        this.#name = new_name;
+        this.label.textContent = this.#name;
     }
 }

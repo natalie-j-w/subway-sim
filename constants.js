@@ -5,3 +5,7 @@ export const CSS_VARS = {
     DOT_COLOR: '--dot-color',
     DOT_BORDER_COLOR: '--dot-border-color'
 }
+
+export const JS_VARS = {
+    DOT_NAME_MAXLENGTH: 20,
+}

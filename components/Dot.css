@@ -1,4 +1,3 @@
-
 .station-dot {
     width : var(--dot-size);
     height : var(--dot-size);
@@ -17,6 +16,9 @@
 
 .station-dot__label {
     position: absolute;
+    display:block;
+    top: 25px;
+    pointer-events:none;
 }
 
 .station-dot:hover {
