@@ -1,9 +1,12 @@
+import {CSS_VARS} from '../constants.js'
+
 export class Dot {
     constructor(x, y, id, name) {
         this.x = x;
         this.y = y;
+        this.showNameLabel = true;
         this.id = id || null;
-        this.name = name || 'Name';
+        this.name = name || 'Unnamed';
         this.connections = [];
 
         this.element = this.createDOMElement();
@@ -24,7 +27,9 @@ export class Dot {
 
     createDOMElement() {
         const new_dot = document.createElement('div');
-        new_dot.className = 'stationDot';
+        const label = document.createElement('div');
+        new_dot.className = CSS_VARS.DOT_CLASSNAME;
+        label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
 
         const size = parseFloat(
             getComputedStyle(document.documentElement)

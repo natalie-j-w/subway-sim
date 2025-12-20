@@ -1,5 +1,5 @@
 
-.stationDot {
+.station-dot {
     width : var(--dot-size);
     height : var(--dot-size);
     background-color : var(--dot-color);
@@ -15,15 +15,19 @@
     cursor: grab;
 }
 
-.stationDot:hover {
+.station-dot__label {
+    position: absolute;
+}
+
+.station-dot:hover {
     border-color: darkblue;
 }
 
-.stationDot.selected {
+.station-dot.selected {
     border-color: red;
 }
 
-.stationDot.dragging {
+.station-dot.dragging {
     opacity: 0.5;
     cursor: grabbing;
 }

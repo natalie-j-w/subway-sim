@@ -10,10 +10,12 @@ Tasks:
     ☐ unfocus dot when clicking sth else
 ☐ create form for dot data
 ☐ Dot drag behavior
-    ☐ update location when dragged
+    ✔ update location when dragged @done(25-12-20 20:38)
     ☐ limit dot to canvas
 ☐ Dot hover: Show popup with data
 ☐ Delete dot by hover + Del
+☐ Add name label to dots @started(25-12-20 21:08)
+☐ Make name label toggleable @started(25-12-20 21:08)
 
 Learn:
     ☐ DOM basics

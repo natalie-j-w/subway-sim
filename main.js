@@ -1,13 +1,15 @@
 import {Dot} from './components/Dot.js'
+import {CSS_VARS} from './constants.js'
 
 let canvas = document.getElementById('canvas');
+let showDotLabels = true;
 let draggedDot;
 
-// Helper function to delegate stationDot event listeners to parent elements
+// Helper function to delegate station-dot event listeners to parent elements
 
 function addDotListener(type, target, callback) {
     target.addEventListener(type, e => {
-        if (e.target.classList.contains('stationDot')) {
+        if (e.target.classList.contains(CSS_VARS.DOT_CLASSNAME)) {
             const dot = e.target.dotInstance;
             callback(e, dot);
         }
