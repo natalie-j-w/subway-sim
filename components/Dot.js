@@ -3,7 +3,6 @@ import {JS_VARS, CSS_VARS} from '../constants.js'
 export class Dot {
     x;
     y;
-    showNameLabel;
     id;
     #name;
     connections;
@@ -11,7 +10,6 @@ export class Dot {
     constructor(x, y, id, name) {
         this.x = x;
         this.y = y;
-        this.showNameLabel = true;
         this.id = id || null;
         this.#name = name || 'Unnamed';
         this.connections = [];
@@ -65,5 +63,9 @@ export class Dot {
         }
         this.#name = new_name;
         this.label.textContent = this.#name;
+    }
+
+    toggleLabel(value) {
+        this.label.style.display = value ? 'block': 'none';
     }
 }

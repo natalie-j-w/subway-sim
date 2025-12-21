@@ -1,7 +1,8 @@
 import {Dot} from './components/Dot.js'
 import {CSS_VARS} from './constants.js'
 
-let canvas = document.getElementById('canvas');
+const canvas = document.getElementById('canvas');
+const dots = document.getElementsByClassName(CSS_VARS.DOT_CLASSNAME);
 let showDotLabels = true;
 let draggedDot;
 
@@ -44,14 +45,14 @@ addDotListener('click', canvas, (e, dot) => {
     }
 })
 
-// Start drag
+// Start dot drag
 
 addDotListener('mousedown', document.body, (e,dot) => {;
     dot.element.classList.add('dragging');
     draggedDot = dot;
 })
 
-// During drag
+// During dot drag
 
 document.body.addEventListener('mousemove', e => {
     let canvasWidth = canvas.clientWidth;
@@ -71,11 +72,11 @@ document.body.addEventListener('mousemove', e => {
         if(new_y > canvasHeight) new_y = canvasHeight - dotSize;
         if(new_y < 0) new_y = dotSize;
         draggedDot.updatePosition(new_x, new_y);
-        console.log(e.pageX, e.pageY, e.clientX, e.clientY)
+        //console.log(e.pageX, e.pageY, e.clientX, e.clientY)
     }
 })
 
-// End drag
+// End dot drag
 
 document.body.addEventListener('mouseup', e => {
     if (draggedDot) {
@@ -83,3 +84,18 @@ document.body.addEventListener('mouseup', e => {
         draggedDot = null;
     }
 })
+
+// Toggle station dot labels
+
+let toggle = document.getElementById('toggle-labels');
+
+toggle.addEventListener('change', e => {
+    console.log(toggle.checked);
+    showDotLabels = toggle.checked;
+
+    Array.from(dots).forEach(el => {
+        console.log(el);
+        el.dotInstance.toggleLabel(showDotLabels);
+    })
+})
+
