@@ -7,5 +7,5 @@ export const CSS_VARS = {
 }
 
 export const JS_VARS = {
-    DOT_NAME_MAXLENGTH: 20,
+    STATION_NAME_MAXLENGTH: 20,
 }

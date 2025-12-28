@@ -1,7 +1,10 @@
-import {Dot} from './components/Dot.js'
-import {CSS_VARS} from './constants.js'
+import {DotView} from './components/Dot.js';
+import {StationData} from './components/StationData.js';
+import {CSS_VARS, JS_VARS} from './constants.js';
+import {} from db_driver
 
 const canvas = document.getElementById('canvas');
+const button = document.getElementById('btn-save')
 const dots = document.getElementsByClassName(CSS_VARS.DOT_CLASSNAME);
 let showDotLabels = true;
 let draggedDot;
@@ -21,9 +24,10 @@ function addDotListener(type, target, callback) {
 
 canvas.addEventListener('click', e => {
     if (e.target == canvas) {
-        const dot = new Dot(e.pageX, e.pageY);
+        const data = new StationData({x: e.pageX, y: e.pageY});
+        const dot = new DotView(data);
         canvas.appendChild(dot.element);
-        console.log("Created dot with coordinates", e.pageX, e.pageY);
+        console.log("Created dot with coordinates", dot.data.x, dot.data.y);
     }
 });
 
@@ -32,16 +36,18 @@ canvas.addEventListener('click', e => {
 addDotListener('click', canvas, (e, dot) => {
     // Single click to see data
     if (e.detail == 1) {
-        console.log("Clicked dot", dot.x, dot.y, dot.getName());
+        console.log("Clicked dot", dot.data.x, dot.data.y, dot.data.getName());
     }
 
     // Double click to change data
+    // TODO: Make more station data editable
     if (e.detail == 2) {
-        const curr_name = dot.getName();
+        const curr_name = dot.data.getName();
         const new_name_prompt = prompt("Station name:");
         const new_name = (new_name_prompt) ? new_name_prompt : curr_name;
-        dot.setName(new_name);
-        console.log("Previous name:", curr_name ,"New name:", dot.getName())
+
+        dot.data.setName(new_name);
+        console.log("Previous name:", curr_name ,"New name:", dot.data.getName())
     }
 })
 
@@ -64,6 +70,7 @@ document.body.addEventListener('mousemove', e => {
     );
 
     if(draggedDot) {
+        // FIXME: Fix dot drag limit to canvas
         let new_x = e.pageX;
         let new_y = e.pageY;
         
@@ -98,4 +105,6 @@ toggle.addEventListener('change', e => {
         el.dotInstance.toggleLabel(showDotLabels);
     })
 })
+
+// Button
 

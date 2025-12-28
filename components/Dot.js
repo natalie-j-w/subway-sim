@@ -1,71 +1,51 @@
-import {JS_VARS, CSS_VARS} from '../constants.js'
+import {CSS_VARS} from '../constants.js'
 
-export class Dot {
-    x;
-    y;
-    id;
-    #name;
-    connections;
+const dotSize = parseFloat(
+    getComputedStyle(document.documentElement)
+        .getPropertyValue('--dot-size')
+);
 
-    constructor(x, y, id, name) {
-        this.x = x;
-        this.y = y;
-        this.id = id || null;
-        this.#name = name || 'Unnamed';
-        this.connections = [];
-
+export class DotView {
+    constructor(stationData) {
+        this.data = stationData;
         this.element = this.createDOMElement();
         this.label;
         this.element.dotInstance = this;
     }
 
-    updatePosition(x, y) {
-        this.x = x;
-        this.y  = y;
-        const size = parseFloat(
-            getComputedStyle(document.documentElement)
-                .getPropertyValue('--dot-size')
-        );
+    updatePosition(newX, newY) {
+        this.data.x = newX;
+        this.data.y  = newY;
 
-        this.element.style.left = `${x - size / 2}px`;
-        this.element.style.top  = `${y - size / 2}px`;
+
+        this.element.style.left = `${newX - dotSize / 2}px`;
+        this.element.style.top  = `${newY - dotSize / 2}px`;
     }
 
     createDOMElement() {
         const dot = document.createElement('div');
         const label = document.createElement('div');
+
         dot.className = CSS_VARS.DOT_CLASSNAME;
         label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
 
         this.label = label;
-        label.textContent = this.#name;
-
-        const size = parseFloat(
-            getComputedStyle(document.documentElement)
-                .getPropertyValue('--dot-size')
-        );
+        label.textContent = this.data.getName();
 
         dot.style.position = 'absolute';
-        dot.style.left = `${this.x - size / 2}px`;
-        dot.style.top  = `${this.y - size / 2}px`;
+        dot.style.left = `${this.data.x - dotSize / 2}px`;
+        dot.style.top  = `${this.data.y - dotSize / 2}px`;
 
         dot.appendChild(label);
         return dot;
     }
 
-    getName() {
-        return this.#name;
+    setLabel(newName) {
+        this.data.setName(newName);
+        this.element.label.textContent = this.data.getName();
     }
 
-    setName(new_name) {
-        if (new_name.length > JS_VARS.DOT_NAME_MAXLENGTH) {
-            throw (`Station name max length: ${JS_VARS.DOT_NAME_MAXLENGTH} characters`)
-        }
-        this.#name = new_name;
-        this.label.textContent = this.#name;
-    }
-
-    toggleLabel(value) {
+    toggleLabelVisibility(value) {
         this.label.style.display = value ? 'block': 'none';
     }
 }
