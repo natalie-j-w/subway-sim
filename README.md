@@ -4,6 +4,20 @@ This project is an interactive web application for designing and simulating subw
 
 The project is developed as a hands-on learning initiative with a strong focus on practical web development using good coding practices.
 
+# Learning roadmap
+**Current progress**
+1. HTML and CSS - basic UI creation
+2. JavaScript: interactivity; creating, editing, moving UI elements; event listeners
+3. MySQL - installation, local database setup, basic table structures
+4. Python SQLAlchemy - connecting to the database, creating, editing, and querying tables
+5. APIs - understanding how backend APIs work
+6. Python FastAPI - setting up API endpoints for database operations
+
+**Next Steps:**
+7. JavaScript async patterns (async/await, promises) to communicate with backend APIs
+8. Create station-to-station connections
+9. Implement trains, lines, schedules, movement logic, algorithms, etc.
+
 # Design goals
 - Incremental complexity to support learning
 - Rapid prototyping of new concepts and features
@@ -12,36 +26,33 @@ The project is developed as a hands-on learning initiative with a strong focus o
 - Appropriate documentation
 
 # Feature Roadmap
-## Phase 1 - Interactive subway network editor
+
+**Interactive Subway Network Editor** ███████▒▒▒ 70% 
 - Create stations on a canvas via mouse interaction
-- Visual representation of station data with labels and hover states
-- Station selection, focus, and editing
-- Drag-and-drop station repositioning
+- Visual representation with labels and hover states
+- Selection, focus, and editing of stations
+- Drag-and-drop repositioning
 - Contextual actions (hover details, delete via keyboard)
 
-### Skills needed
-- Frontend architecture
-- Event-driven programming (mouse, keyboard, focus states)
-- UI/UX interaction design
-- DOM performance and interaction modeling
-
-## Phase 2 - Subway network connectivity (In Progress)
+**Subway Network Connectivity** ▒▒▒▒▒▒▒▒▒▒ 0%
 - Connect stations to form track segments
 - Visual feedback for connections and selected paths
 - Support for multi-line station membership
 
-## Phase 3 - Persistence & data model (In Progress)
+**Persistence & Data Model** ██▒▒▒▒▒▒▒▒ 20%
 - Relational database schema for stations, lines, and connections
-- Persist station metadata and spatial coordinates
+- Persist station metadata and coordinates
 - Load and render saved networks from the database
-- Sync UI interactions with backend state
-
-## Phase 4 - Line & schedule management (Planned)
+- Sync UI interactions with backend state via API
+    
+**Line & Schedule Management** ▒▒▒▒▒▒▒▒▒▒ 0%
 - Define subway lines as ordered station sequences
-- Assign stations to lines
+- Assign stations to multiple lines
 - Basic timetable and frequency definitions
 
-## Phase 5 - Train movement & pricing simulation (Planned)
-- Simulate train movement according to schedule
+**Train Movement & Pricing Simulation** ▒▒▒▒▒▒▒▒▒▒ 0%
+- Simulate train movement according to schedules
 - Calculate journey paths and travel times
-- Prototype distance- or zone-based ticket pricing (initially based on London Oyster card)
+- Prototype distance- or zone-based ticket pricing (modeled on London Oyster card)
+    
+
