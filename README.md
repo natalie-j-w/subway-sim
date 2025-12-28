@@ -1,30 +1,29 @@
 # subway-sim
 
-This project is an interactive web application for designing and simulating subway systems. Users can create and manage stations and lines, define schedules, and simulate train movement and journey-based ticket pricing.
+Interactive web application for designing and simulating subway systems. Users can create and manage stations and lines, define schedules, and simulate train movement and journey-based ticket pricing.
 
-The project is developed as a hands-on learning initiative with a strong focus on practical web development using good coding practices.
+This project is a hands-on learning initiative, gradually building practical skills in full-stack web development, including frontend, backend, database integration, API design and system design.
 
 # Learning roadmap
 **Current progress**
-1. HTML and CSS - basic UI creation
+1. HTML and CSS: basic UI creation
 2. JavaScript: interactivity; creating, editing, moving UI elements; event listeners
-3. MySQL - installation, local database setup, basic table structures
-4. Python SQLAlchemy - connecting to the database, creating, editing, and querying tables
-5. APIs - understanding how backend APIs work
-6. Python FastAPI - setting up API endpoints for database operations
+3. MySQL: installation, local database setup, basic table structures
+4. Python SQLAlchemy: connecting to the database; creating, editing, and querying tables
+5. APIs: understanding how backend APIs work
+6. Python FastAPI: setting up API endpoints for database operations
 
 **Next Steps:**
 
-7. JavaScript async patterns (async/await, promises) to communicate with backend APIs
-8. Create station-to-station connections
-9. Implement trains, lines, schedules, movement logic, algorithms, etc.
+7. JavaScript async patterns (async/await, promises) to communicate with backend API
+8. More complex database relationships
 
 # Design goals
 - Incremental complexity to support learning
 - Rapid prototyping of new concepts and features
 - Clean separation of visual and domain logic
 - Modular, extensible architecture
-- Appropriate documentation
+- Well-documented and maintainable code
 
 # Feature Roadmap
 
@@ -56,5 +55,6 @@ The project is developed as a hands-on learning initiative with a strong focus o
 - Calculate journey paths and travel times
 - Prototype distance- or zone-based ticket pricing (modeled on London Oyster card)
     
+
 
 
