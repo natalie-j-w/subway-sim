@@ -14,6 +14,7 @@ The project is developed as a hands-on learning initiative with a strong focus o
 6. Python FastAPI - setting up API endpoints for database operations
 
 **Next Steps:**
+
 7. JavaScript async patterns (async/await, promises) to communicate with backend APIs
 8. Create station-to-station connections
 9. Implement trains, lines, schedules, movement logic, algorithms, etc.
@@ -55,4 +56,5 @@ The project is developed as a hands-on learning initiative with a strong focus o
 - Calculate journey paths and travel times
 - Prototype distance- or zone-based ticket pricing (modeled on London Oyster card)
     
+
 
