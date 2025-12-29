@@ -1,7 +1,7 @@
 import {DotView} from './components/Dot.js';
 import {StationData} from './components/StationData.js';
 import {CSS_VARS, JS_VARS} from './constants.js';
-import {} from db_driver
+import * as db from db_driver;
 
 const canvas = document.getElementById('canvas');
 const button = document.getElementById('btn-save')
@@ -21,7 +21,6 @@ function addDotListener(type, target, callback) {
 }
 
 // Create dot on canvas
-
 canvas.addEventListener('click', e => {
     if (e.target == canvas) {
         const data = new StationData({x: e.pageX, y: e.pageY});
@@ -32,7 +31,6 @@ canvas.addEventListener('click', e => {
 });
 
 // Single click and double click dots
-
 addDotListener('click', canvas, (e, dot) => {
     // Single click to see data
     if (e.detail == 1) {
@@ -52,14 +50,12 @@ addDotListener('click', canvas, (e, dot) => {
 })
 
 // Start dot drag
-
 addDotListener('mousedown', document.body, (e,dot) => {;
     dot.element.classList.add('dragging');
     draggedDot = dot;
 })
 
 // During dot drag
-
 document.body.addEventListener('mousemove', e => {
     let canvasWidth = canvas.clientWidth;
     let canvasHeight = canvas.clientHeight;
@@ -84,7 +80,6 @@ document.body.addEventListener('mousemove', e => {
 })
 
 // End dot drag
-
 document.body.addEventListener('mouseup', e => {
     if (draggedDot) {
         draggedDot.element.classList.remove('dragging');
@@ -93,7 +88,6 @@ document.body.addEventListener('mouseup', e => {
 })
 
 // Toggle station dot labels
-
 let toggle = document.getElementById('toggle-labels');
 
 toggle.addEventListener('change', e => {
