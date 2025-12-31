@@ -1,3 +1,5 @@
+/* UPDATE CONSTANTS.JS WHEN CHANGING CLASS NAME */
+
 .station-dot {
     width : var(--dot-size);
     height : var(--dot-size);

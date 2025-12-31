@@ -1,15 +1,20 @@
 import {DotView} from './components/DotView.js';
+import { LineView } from './components/LineView.js';
 import {StationData} from './components/StationData.js';
-import {CSS_VARS, JS_VARS} from './constants.js';
+import { TrackData } from './components/TrackData.js';
+import {CSS_VARS} from './constants.js';
 
 // DOM element references
 const canvas = document.getElementById('canvas');
-const button = document.getElementById('btn-save');
+let btnToggleDotLabels = document.getElementById('toggle-labels');
+const svg = document.getElementById('svg-layer');
 const dots = document.getElementsByClassName(CSS_VARS.DOT_CLASSNAME);
 
 // Application state
+btnToggleDotLabels.checked = true;
+
 /** @type {boolean} Global flag for label visibility */
-let showDotLabels = true;
+let showDotLabels = btnToggleDotLabels.checked;
 
 /** @type {DotView|null} Currently dragged dot instance */
 let draggedDot;
@@ -27,11 +32,40 @@ let selectedDot;
 function addDotListener(type, target, callback) {
     target.addEventListener(type, e => {
         if (e.target.classList.contains(CSS_VARS.DOT_CLASSNAME)) {
+            /** @type {DotView} */
             const dot = e.target.dotInstance;
             callback(e, dot);
         }
     });
 }
+
+function log_dimensions() {
+    console.log("Canvas height:", canvas.clientHeight, "Canvas width:", canvas.clientWidth);
+    console.log("SVG height:", svg.clientHeight, "SVG width:", svg.clientWidth);
+}
+
+log_dimensions();
+
+// TODO: documentation
+function svg_draw_line(x1, y1, x2, y2, color) {
+    const data = new TrackData();
+    const line = new LineView({x1: x1, y1: y1, x2: x2, y2: y2, color: color, data: data});
+
+    svg.appendChild(line.element);
+    console.log("Drew line", line)    
+}
+
+svg.addEventListener('mouseenter', e => {
+    console.log("Entered SVG");
+});
+
+svg.addEventListener('mouseleave', e => {
+    console.log("Left SVG");
+});
+
+
+svg_draw_line(20, 40, 100, 200, "red");
+svg_draw_line(1, 300, 510, 390, "green");
 
 // ============================================================================
 // DOT CREATION
@@ -42,10 +76,11 @@ function addDotListener(type, target, callback) {
  */
 canvas.addEventListener('click', e => {
     if (e.target == canvas) {
-        const data = new StationData({x: e.pageX, y: e.pageY});
-        const dot = new DotView(data);
+        const stationData = new StationData();
+        const dot = new DotView({x: e.pageX, y: e.pageY, stationData: stationData});
+        dot.label.style.display = showDotLabels ? 'block': 'none';
         canvas.appendChild(dot.element);
-        console.log("Created dot with coordinates", dot.data.x, dot.data.y);
+        console.log("Created dot with coordinates", dot.x, dot.y);
     }
 });
 
@@ -60,31 +95,33 @@ canvas.addEventListener('click', e => {
  * - Ctrl+Click (with another dot selected): Create connection between dots
  */
 addDotListener('click', canvas, (e, dot) => {
-    // Connect two dots by clicking and focusing one dot, then Ctrl+clicking another (unfocused) dot
+    // Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot
     if (selectedDot && dot != selectedDot && e.ctrlKey) {
-        console.log(e.target.dotInstance);
-        console.log(selectedDot);
-        // TODO: Implement connection logic
+        console.log("Focussed dot:", selectedDot);
+        console.log("Ctrl-clicked dot:", dot)
+        
+        // TODO: Line between connected dots
+        // TODO: Save connection in StationData
     }
     
-    // Single click to see data and focus dot
+    // Single left-click to see data and focus dot
     if (e.detail == 1 && !e.ctrlKey) {
         document.querySelector('.selected')?.classList.remove('selected');
         selectedDot = e.target.dotInstance;
         if (selectedDot) {
             selectedDot.element.classList.add('selected');
-            console.log("Selected dot", selectedDot.data.x, selectedDot.data.y, selectedDot.data.getName());
+            console.log("Focussed dot", selectedDot.x, selectedDot.y, selectedDot.stationData.getName());
         }
     }
     
-    // Double click to change station name
+    // Double left-click to change station name
     // TODO: Make more station data editable
     if (e.detail == 2) {
-        const curr_name = dot.data.getName();
+        const curr_name = dot.stationData.getName();
         const new_name_prompt = prompt("Station name:");
         const new_name = (new_name_prompt) ? new_name_prompt : curr_name;
-        dot.data.setName(new_name);
-        console.log("Previous name:", curr_name ,"New name:", dot.data.getName())
+        dot.stationData.setName(new_name);
+        console.log("Previous name:", curr_name ,"New name:", dot.stationData.getName())
     }
 })
 
@@ -115,8 +152,8 @@ addDotListener('mousedown', document.body, (e, dot) => {
  * Constrains dot movement within canvas boundaries.
  */
 document.body.addEventListener('mousemove', e => {
-    let canvasWidth = canvas.clientWidth;
-    let canvasHeight = canvas.clientHeight;
+    const canvasWidth = canvas.clientWidth;
+    const canvasHeight = canvas.clientHeight;
     const dotSize = parseFloat(
         getComputedStyle(document.documentElement)
             .getPropertyValue('--dot-size')
@@ -124,16 +161,16 @@ document.body.addEventListener('mousemove', e => {
     
     if(draggedDot) {
         // FIXME: Fix dot drag limit to canvas (currently using page coordinates)
-        let new_x = e.pageX;
-        let new_y = e.pageY;
+        let newX = e.pageX;
+        let newY = e.pageY;
         
         // Constrain to canvas boundaries
-        if(new_x > canvasWidth) new_x = canvasWidth - dotSize;
-        if(new_x < 0) new_x = dotSize;
-        if(new_y > canvasHeight) new_y = canvasHeight - dotSize;
-        if(new_y < 0) new_y = dotSize;
+        if(newX > canvasWidth) newX = canvasWidth - dotSize;
+        if(newX < 0) newX = dotSize;
+        if(newY > canvasHeight) newY = canvasHeight - dotSize;
+        if(newY < 0) newY = dotSize;
         
-        draggedDot.updatePosition(new_x, new_y);
+        draggedDot.updatePosition(newX, newY);
     }
 })
 
@@ -154,18 +191,11 @@ document.body.addEventListener('mouseup', e => {
 /**
  * Toggles visibility of all station name labels based on checkbox state.
  */
-let toggle = document.getElementById('toggle-labels');
-toggle.addEventListener('change', e => {
-    console.log(toggle.checked);
-    showDotLabels = toggle.checked;
+btnToggleDotLabels.addEventListener('change', e => {
+    showDotLabels = btnToggleDotLabels.checked;
     Array.from(dots).forEach(el => {
-        console.log(el);
         el.dotInstance.toggleLabelVisibility(showDotLabels);
     })
+    console.log("Changed dot label visibility to", btnToggleDotLabels.checked)
 })
 
-// ============================================================================
-// CONNECTIONS
-// ============================================================================
-
-// TODO: Create connection between stations

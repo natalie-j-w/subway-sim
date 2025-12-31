@@ -2,17 +2,11 @@ import {JS_VARS} from '../constants.js'
 
 /**
  * Represents the data model for a station in the metro map.
- * Stores station metadata including position, name, and connections to other stations.
+ * Stores station metadata including id, name, and connections to other stations.
  */
 export class StationData {
     /** @type {string|number} Unique identifier for the station */
     id
-    
-    /** @type {number} X coordinate of the station on the canvas */
-    x
-    
-    /** @type {number} Y coordinate of the station on the canvas */
-    y
     
     /** @type {string} Private field storing the station name */
     #name
@@ -22,31 +16,25 @@ export class StationData {
     
     /**
      * Creates a new StationData instance.
-     * @param {Object} config - Configuration object for the station.
-     * @param {string|number} config.id - Unique identifier for the station.
-     * @param {number} config.x - X coordinate on the canvas.
-     * @param {number} config.y - Y coordinate on the canvas.
-     * @param {string} [config.name="Unnamed"] - Name of the station.
-     * @param {Array} [config.connections=[]] - Array of connected station IDs or references.
-     */
-    constructor( {id, x, y, name="Unnamed", connections=[]} ) {
+    * @param {Object} params - Station configuration
+    * @param {string|number} params.id - Unique identifier
+    * @param {string} [params.name="Unnamed"] - Station name
+    * @param {Array} [params.connections=[]] - Connected stations
+    */
+    constructor( {id, name="Unnamed", connections=[]} = {} ) {
         this.id = id;
-        this.x = x;
-        this.y = y;
         this.#name = name;
         this.connections = connections;
     }
     
     /**
      * Converts the station data to a plain object for serialization.
-     * Used for saving to database, localStorage, or sending to APIs.
+     * Used for sending to APIs.
      * @returns {Object} Plain object containing station data with public fields.
      */
     toDTO () {
         return {
             id: this.id,
-            x: this.x,
-            y: this.y,
             name: this.getName()
             // TODO: Add connections
         }
@@ -72,5 +60,6 @@ export class StationData {
                 Current length: ${newName.length}`)
         }
         this.#name = newName;
+        
     }
 }

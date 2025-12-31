@@ -1,7 +1,7 @@
 import {CSS_VARS} from '../constants.js'
-import { StationData } from './StationData.js';
+import {StationData } from './StationData.js';
 
-const dotSize = parseFloat(
+const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
         .getPropertyValue('--dot-size')
 );
@@ -13,32 +13,28 @@ const dotSize = parseFloat(
 export class DotView {
     /**
      * Creates a new DotView instance.
+     * @param {number} x -  X coordinate of the dot on the canvas
+     * @param {number} y -  Y coordinate of the dot on the canvas
      * @param {StationData} stationData - The station metadata associated with this dot.
      */
-    constructor(stationData) {
-        /** @type {StationData} Station metadata (coordinates, name, etc.) */
-        this.data = stationData;
+    constructor( {x, y, stationData} = {} ) {
+        /** @type {number} X coordinate of the dot on the canvas */
+        this.x = x;
+
+        /** @type {number} Y coordinate of the dot on the canvas */
+        this.y = y;      
+
+        /** @type {StationData} Station metadata (name, etc.) */
+        this.stationData = stationData;
         
         /** @type {HTMLDivElement} The DOM element representing the dot */
         this.element = this.createDOMElement();
-        
+
         /** @type {HTMLDivElement} The label element displaying the station name */
         this.label;
         
         /** Creates a circular reference from DOM element back to this DotView instance */
         this.element.dotInstance = this;
-    }
-    
-    /**
-     * Updates the position of the dot on the canvas and syncs with data model.
-     * @param {number} newX - New X coordinate (center of dot).
-     * @param {number} newY - New Y coordinate (center of dot).
-     */
-    updatePosition(newX, newY) {
-        this.data.x = newX;
-        this.data.y  = newY;
-        this.element.style.left = `${newX - dotSize / 2}px`;
-        this.element.style.top  = `${newY - dotSize / 2}px`;
     }
     
     /**
@@ -54,14 +50,26 @@ export class DotView {
         label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
         
         this.label = label;
-        label.textContent = this.data.getName();
+        label.textContent = this.stationData.getName();
         
         dot.style.position = 'absolute';
-        dot.style.left = `${this.data.x - dotSize / 2}px`;
-        dot.style.top  = `${this.data.y - dotSize / 2}px`;
+        dot.style.left = `${this.x - varDotSize / 2}px`;
+        dot.style.top  = `${this.y - varDotSize / 2}px`;
         
         dot.appendChild(label);
         return dot;
+    }
+
+    /**
+     * Updates the position of the dot on the canvas
+     * @param {number} newX - New X coordinate (center of dot)
+     * @param {number} newY - New Y coordinate (center of dot)
+     */
+    updatePosition(newX, newY) {
+        this.x = newX;
+        this.y  = newY;
+        this.element.style.left = `${this.x - varDotSize / 2}px`;
+        this.element.style.top  = `${this.y - varDotSize / 2}px`;
     }
     
     /**
@@ -69,8 +77,8 @@ export class DotView {
      * @param {string} newName - The new name for the station.
      */
     setLabel(newName) {
-        this.data.setName(newName);
-        this.label.textContent = this.data.getName();
+        this.stationData.setName(newName);
+        this.label.textContent = this.stationData.getName();
     }
     
     /**
