@@ -1,22 +1,24 @@
-from pydantic import BaseModel
+# DB API TO BE IMPLEMENTED
 
-class Station(BaseModel):
-    StationID: int
-    Name: str
-    LocationX: int
-    LocationY: int
+# from pydantic import BaseModel
 
-    model_config = {
-        "from_attributes": True
-    }
+# class Station(BaseModel):
+#     StationID: int
+#     Name: str
+#     LocationX: int
+#     LocationY: int
 
-class Line(BaseModel):
-    LineID: int
-    Name: str
-    Color: str
-    ScheduleFrequency: float
+#     model_config = {
+#         "from_attributes": True
+#     }
 
-    model_config = {
-        "from_attributes": True
-    }
+# class Line(BaseModel):
+#     LineID: int
+#     Name: str
+#     Color: str
+#     ScheduleFrequency: float
+
+#     model_config = {
+#         "from_attributes": True
+#     }
 

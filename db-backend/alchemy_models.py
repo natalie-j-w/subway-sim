@@ -1,27 +1,29 @@
-from sqlalchemy import Column, Integer, String, Float , UniqueConstraint
-from sqlalchemy.orm import declarative_base
+# DB TO BE IMPLEMENTED
 
-Base = declarative_base()
+# from sqlalchemy import Column, Integer, String, Float , UniqueConstraint
+# from sqlalchemy.orm import declarative_base
 
-class Station(Base):
-    """
-    StationID: int
-    Name: str
-    LocationX: int
-    LocationY: int
-    """
+# Base = declarative_base()
 
-    __tablename__ = 'Stations'
+# class Station(Base):
+#     """
+#     StationID: int
+#     Name: str
+#     LocationX: int
+#     LocationY: int
+#     """
 
-    StationID = Column(Integer, primary_key=True)
-    Name = Column(String(255), nullable=True)
-    LocationX = Column(Integer, nullable=True)
-    LocationY = Column(Integer, nullable=True)
+#     __tablename__ = 'Stations'
 
-    __table_args__ = (UniqueConstraint("Name", name="UniqueName"),)
+#     StationID = Column(Integer, primary_key=True)
+#     Name = Column(String(255), nullable=True)
+#     LocationX = Column(Integer, nullable=True)
+#     LocationY = Column(Integer, nullable=True)
 
-    def __repr__(self):
-        return(f"ID: {self.StationID}, Name:{self.Name}, LocationX:{self.LocationX}, LocationY:{self.LocationY}")
+#     __table_args__ = (UniqueConstraint("Name", name="UniqueName"),)
+
+#     def __repr__(self):
+#         return(f"ID: {self.StationID}, Name:{self.Name}, LocationX:{self.LocationX}, LocationY:{self.LocationY}")
 
 
 # class StationConnection(Base):

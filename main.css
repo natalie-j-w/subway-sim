@@ -6,14 +6,22 @@
     font-size:small
 }
 
-#canvas {
+#container {
     position: absolute;
     top: 0;
     left: 0;
     height: 400px;
     width: 600px;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
     background-color: rgb(253, 255, 127);
-    pointer-events: all;
+    pointer-events: none;
 }
 
 #svg-layer {
@@ -22,7 +30,7 @@
     height: 100%;
     top: 0;
     left: 0;
-    pointer-events: all;
+    pointer-events: none;
 }
 
 #btn-save {

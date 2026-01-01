@@ -11,20 +11,15 @@ export class StationData {
     /** @type {string} Private field storing the station name */
     #name
     
-    /** @type {Array} List of connections to other stations */
-    connections
-    
     /**
      * Creates a new StationData instance.
     * @param {Object} params - Station configuration
     * @param {string|number} params.id - Unique identifier
     * @param {string} [params.name="Unnamed"] - Station name
-    * @param {Array} [params.connections=[]] - Connected stations
     */
-    constructor( {id, name="Unnamed", connections=[]} = {} ) {
+    constructor( {id, name="Unnamed"} = {} ) {
         this.id = id;
         this.#name = name;
-        this.connections = connections;
     }
     
     /**
@@ -60,6 +55,6 @@ export class StationData {
                 Current length: ${newName.length}`)
         }
         this.#name = newName;
-        
+
     }
 }

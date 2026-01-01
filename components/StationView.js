@@ -10,60 +10,60 @@ const varDotSize = parseFloat(
  * Represents the visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
  */
-export class DotView {
+export class StationView {
     /**
-     * Creates a new DotView instance.
-     * @param {number} x -  X coordinate of the dot on the canvas
-     * @param {number} y -  Y coordinate of the dot on the canvas
-     * @param {StationData} stationData - The station metadata associated with this dot.
+     * Creates a new StationView instance.
+     * @param {number} x -  X coordinate of the station dot on the canvas
+     * @param {number} y -  Y coordinate of the station dot on the canvas
+     * @param {StationData} stationData - The station metadata associated with this station dot.
      */
     constructor( {x, y, stationData} = {} ) {
-        /** @type {number} X coordinate of the dot on the canvas */
+        /** @type {number} X coordinate of the station dot on the canvas */
         this.x = x;
 
-        /** @type {number} Y coordinate of the dot on the canvas */
+        /** @type {number} Y coordinate of the station dot on the canvas */
         this.y = y;      
 
         /** @type {StationData} Station metadata (name, etc.) */
         this.stationData = stationData;
         
-        /** @type {HTMLDivElement} The DOM element representing the dot */
+        /** @type {HTMLDivElement} The DOM element representing the station */
         this.element = this.createDOMElement();
 
         /** @type {HTMLDivElement} The label element displaying the station name */
         this.label;
         
-        /** Creates a circular reference from DOM element back to this DotView instance */
+        /** Creates a circular reference from DOM element back to this StationView instance */
         this.element.dotInstance = this;
     }
     
     /**
-     * Creates and configures the DOM elements for the dot and its label.
+     * Creates and configures the DOM elements for the station and its label.
      * @returns {HTMLDivElement} The dot element with label attached.
      * @private
      */
     createDOMElement() {
-        const dot = document.createElement('div');
+        const stationDot = document.createElement('div');
         const label = document.createElement('div');
         
-        dot.className = CSS_VARS.DOT_CLASSNAME;
+        stationDot.className = CSS_VARS.DOT_CLASSNAME;
         label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
         
         this.label = label;
         label.textContent = this.stationData.getName();
         
-        dot.style.position = 'absolute';
-        dot.style.left = `${this.x - varDotSize / 2}px`;
-        dot.style.top  = `${this.y - varDotSize / 2}px`;
+        stationDot.style.position = 'absolute';
+        stationDot.style.left = `${this.x - varDotSize / 2}px`;
+        stationDot.style.top  = `${this.y - varDotSize / 2}px`;
         
-        dot.appendChild(label);
-        return dot;
+        stationDot.appendChild(label);
+        return stationDot;
     }
 
     /**
-     * Updates the position of the dot on the canvas
-     * @param {number} newX - New X coordinate (center of dot)
-     * @param {number} newY - New Y coordinate (center of dot)
+     * Updates the position of the station on the canvas
+     * @param {number} newX - New X coordinate (center of station dot)
+     * @param {number} newY - New Y coordinate (center of station dot)
      */
     updatePosition(newX, newY) {
         this.x = newX;
