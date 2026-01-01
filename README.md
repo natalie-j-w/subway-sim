@@ -8,15 +8,17 @@ This project is a hands-on learning initiative, gradually building practical ski
 **Current progress**
 1. HTML and CSS: basic UI creation
 2. JavaScript: interactivity; creating, editing, moving UI elements; event listeners
-3. MySQL: installation, local database setup, basic table structures
-4. Python SQLAlchemy: connecting to the database; creating, editing, and querying tables
-5. APIs: understanding how backend APIs work
-6. Python FastAPI: setting up API endpoints for database operations
+
+**Learned and to be used**
+- MySQL: installation, local database setup, basic table structures
+-  Python SQLAlchemy: connecting to the database; creating, editing, and querying tables
+-  APIS: understanding how backend APIs work
+-  Python FastAPI: setting up API endpoints for database operations
 
 **Next Steps:**
 
-7. JavaScript async patterns (async/await, promises) to communicate with backend API
-8. More complex database relationships
+- JavaScript async patterns (async/await, promises) to communicate with backend API
+- More complex database relationships
 
 # Design goals
 - Incremental complexity to support learning
@@ -55,6 +57,7 @@ This project is a hands-on learning initiative, gradually building practical ski
 - Calculate journey paths and travel times
 - Prototype distance- or zone-based ticket pricing (modeled on London Oyster card)
     
+
 
 
 
