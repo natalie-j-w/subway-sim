@@ -1,8 +1,11 @@
 import {StationView} from './components/StationView.js';
-import {LineView } from './components/LineView.js';
+import {TrackView } from './components/TrackView.js';
 import {StationData} from './components/StationData.js';
 import { TrackData } from './components/TrackData.js';
 import {CSS_VARS} from './constants.js';
+import { LineData } from './components/LineData.js';
+
+// TODO: Split up main.js into multiple handler files
 
 // DOM element references
 const container = document.getElementById('container');
@@ -23,21 +26,18 @@ let draggedStationDot;
 /** @type {StationView|null} Currently selected/focused station dot instance */
 let selectedStationDot;
 
-/**
- * @callback DotEventCallback
- * @param {MouseEvent} event
- * @param {StationView} dot
- */
+/** @type {boolean} Tracks if dragging just occured (prevents mouseup events) */
+let wasDragging = false;
 
 /**
  * @param {string} type
  * @param {HTMLElement} target
- * @param {DotEventCallback} callback
+ * @param {DotInstanceEventCallback} callback
  */
 function addDotListener(type, target, callback) {
     target.addEventListener(type, /** @param {MouseEvent} e */ (e) => {
         if (e.target.classList.contains(CSS_VARS.DOT_CLASSNAME)) {
-            /** @type {StationView} */
+            /** @type {StationView} dotInstance */
             const dotInstance = e.target.dotInstance;
             callback(e, dotInstance);
         }
@@ -56,23 +56,11 @@ function log_dimensions() {
 
 log_dimensions();
 
-// TODO: documentation
-function svg_draw_line(x1, y1, x2, y2, color) {
-    const data = new TrackData();
-    const line = new LineView({x1: x1, y1: y1, x2: x2, y2: y2, color: color, data: data});
-
-    svg.appendChild(line.element);
-    console.log("Drew line", line)    
-}
-
 // ============================================================================
 // SETUP
 // ============================================================================
 
 svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`)
-svg_draw_line(20, 40, 100, 200, "red");
-svg_draw_line(1, 1, 30, 30, "green");
-
 
 // ============================================================================
 // ============================================================================
@@ -84,18 +72,29 @@ svg_draw_line(1, 1, 30, 30, "green");
 // STATION CREATION
 // ============================================================================
 
-/**
- * Creates a new station dot when clicking on empty canvas area.
- */
+/** Creates a new station dot when clicking on empty canvas area. */
 container.addEventListener('click', e => {
+    /** Prevents creating new dot after just letting go of dragged dot */
+    if (wasDragging == true) {
+        wasDragging = false;
+        return;
+    }
+
     if (!isInteractiveElement(e)) {
-        const stationData = new StationData();
-        const stationDot = new StationView({x: e.pageX, y: e.pageY, stationData: stationData});
+        const x = e.pageX;
+        const y = e.pageY;
+        const data = new StationData();
+        const stationDot = new StationView(x, y, data);
         stationDot.label.style.display = showDotLabels ? 'block': 'none';
         canvas.appendChild(stationDot.element);
         console.log("Placed station dot at coordinates", stationDot.x, stationDot.y);
     }
+    else {
+        console.log("Clicked interactable element");
+    }
 });
+
+
 
 // ============================================================================
 // STATION DOT INTERACTION (Click, Double-click, Ctrl+Click)
@@ -107,21 +106,32 @@ container.addEventListener('click', e => {
  * - Double click: Edit station name
  * - Ctrl+Click (with another dot selected): Create connection between dots
 */
-addDotListener('click', container, (e, stationDot) => {
-    // Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot
+addDotListener('click', container, (e, clickedStationDot) => {
+    // Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot, draw line between them
     // FIXME: Dot should not be focussed when clicking twice
-    if (selectedStationDot && stationDot != selectedStationDot && e.ctrlKey) {
+    if (selectedStationDot && clickedStationDot != selectedStationDot && e.ctrlKey) {
         console.log("Focussed dot:", selectedStationDot);
-        console.log("Ctrl-clicked dot:", stationDot)
-        
-        const line = new LineView({x1: stationDot.x, y1:stationDot.y, x2:selectedStationDot.x, y2: selectedStationDot.y, color:"blue"})
-        console.log(line.element)
-        svg.appendChild(line.element);
+        console.log("Ctrl-clicked dot:", clickedStationDot)
 
-        // TODO: Save connections in data
+        const stationA = selectedStationDot; 
+        const stationB = clickedStationDot;
+        const trackData = new TrackData(stationA, stationB);
+
+        stationA.stationData.connections.push(trackData);
+        stationB.stationData.connections.push(trackData);
+        trackData.lineData.tracks.push(trackData);
+
+        const trackView = new TrackView(
+            stationA.x, stationA.y, 
+            stationB.x, stationB.y, 
+            trackData.lineData.color, trackData);
+        svg.appendChild(trackView.element);
+
+        console.log(`Created track from ${stationA.stationData.getName()} to ${stationB.stationData.getName()} with line ${trackData.lineData.name}`);
+        console.log("Track:", trackData);
     }
     
-    // Single left-click to see data and focus dot
+    // Single left-click (without ctrl key) to see data and focus dot
     if (e.detail == 1 && !e.ctrlKey) {
         document.querySelector('.selected')?.classList.remove('selected');
         selectedStationDot = e.target.dotInstance;
@@ -134,11 +144,12 @@ addDotListener('click', container, (e, stationDot) => {
     // Double left-click to change station name
     // TODO: Make more station data editable
     if (e.detail == 2) {
-        const curr_name = stationDot.stationData.getName();
+        const curr_name = clickedStationDot.stationData.getName();
         const new_name_prompt = prompt("Station name:");
         const new_name = (new_name_prompt) ? new_name_prompt : curr_name;
-        stationDot.stationData.setName(new_name);
-        console.log("Previous name:", curr_name ,"New name:", stationDot.stationData.getName())
+        clickedStationDot.stationData.setName(new_name);
+        clickedStationDot.setLabel(new_name);
+        console.log("Previous name:", curr_name ,"New name:", clickedStationDot.stationData.getName())
     }
 })
 
@@ -158,13 +169,17 @@ document.body.addEventListener('click', e => {
 addDotListener('mousedown', document.body, (e, stationDot) => {
     stationDot.element.classList.add('dragging');
     draggedStationDot = stationDot;
+    e.preventDefault();
+    console.log("Started dragging dot", draggedStationDot)
 })
 
+// TODO: Update line position when dot is moved
 /**
  * Updates dot position during drag operation.
  * Constrains dot movement within canvas boundaries.
  */
 document.body.addEventListener('mousemove', e => {
+    e.preventDefault();
     const canvasWidth = canvas.clientWidth;
     const canvasHeight = canvas.clientHeight;
     const dotSize = parseFloat(
@@ -173,6 +188,7 @@ document.body.addEventListener('mousemove', e => {
     );
     
     if(draggedStationDot) {
+       wasDragging = true;
         // FIXME: Fix dot drag limit to canvas (currently using page coordinates)
         let newX = e.pageX;
         let newY = e.pageY;
@@ -188,8 +204,9 @@ document.body.addEventListener('mousemove', e => {
 })
 
 /** Ends dot dragging when mouse button is released.*/
-document.body.addEventListener('mouseup', e => {
+document.body.addEventListener('mouseup', () => {
     if (draggedStationDot) {
+        console.log("Stopped dragging dot", draggedStationDot)
         draggedStationDot.element.classList.remove('dragging');
         draggedStationDot = null;
     }
@@ -205,6 +222,6 @@ btnToggleDotLabels.addEventListener('change', e => {
     Array.from(stationDots).forEach(el => {
         el.dotInstance.toggleLabelVisibility(showDotLabels);
     })
-    console.log("Changed dot label visibility to", btnToggleDotLabels.checked)
+    console.log("Changed station label visibility to", btnToggleDotLabels.checked)
 })
 

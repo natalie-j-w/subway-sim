@@ -1,4 +1,5 @@
 import {JS_VARS} from '../constants.js'
+import { TrackData } from './TrackData.js'
 
 /**
  * Represents the data model for a station in the metro map.
@@ -8,8 +9,14 @@ export class StationData {
     /** @type {string|number} Unique identifier for the station */
     id
     
-    /** @type {string} Private field storing the station name */
+    /** @type {string} Station name
+     * @private
+     */
     #name
+
+    /** @type TrackData[ ] - List of tracks that connect this station to another station
+     */
+    connections
     
     /**
      * Creates a new StationData instance.
@@ -17,15 +24,25 @@ export class StationData {
     * @param {string|number} params.id - Unique identifier
     * @param {string} [params.name="Unnamed"] - Station name
     */
-    constructor( {id, name="Unnamed"} = {} ) {
+    constructor(id, name="Unnamed") {
         this.id = id;
-        this.#name = name;
+        this.setName(name);
+        this.connections = [];
+    }
+
+    // TODO: Implement addConnection
+    addConnection(connectedStation) {
+        // Check if connection already exists (same stations, same line)
+        // If yes, don't do anything
+        // If no, create
+        return;
     }
     
     /**
      * Converts the station data to a plain object for serialization.
      * Used for sending to APIs.
      * @returns {Object} Plain object containing station data with public fields.
+     * @example {id, name}
      */
     toDTO () {
         return {
@@ -55,6 +72,5 @@ export class StationData {
                 Current length: ${newName.length}`)
         }
         this.#name = newName;
-
     }
 }

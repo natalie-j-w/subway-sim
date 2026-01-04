@@ -13,27 +13,22 @@ const varDotSize = parseFloat(
 export class StationView {
     /**
      * Creates a new StationView instance.
-     * @param {number} x -  X coordinate of the station dot on the canvas
-     * @param {number} y -  Y coordinate of the station dot on the canvas
-     * @param {StationData} stationData - The station metadata associated with this station dot.
+     * @param {number} x
+     * @param {number} y
+     * @param {StationData} stationData
      */
-    constructor( {x, y, stationData} = {} ) {
-        /** @type {number} X coordinate of the station dot on the canvas */
+    constructor(x, y, stationData) {
         this.x = x;
+        this.y = y;
+        this.stationData = stationData || new StationData();
 
-        /** @type {number} Y coordinate of the station dot on the canvas */
-        this.y = y;      
+        /** @type {HTMLDivElement} */
+        this.label;
 
-        /** @type {StationData} Station metadata (name, etc.) */
-        this.stationData = stationData;
-        
-        /** @type {HTMLDivElement} The DOM element representing the station */
+        /** @type {HTMLDivElement} */
         this.element = this.createDOMElement();
 
-        /** @type {HTMLDivElement} The label element displaying the station name */
-        this.label;
-        
-        /** Creates a circular reference from DOM element back to this StationView instance */
+        /** @type {StationView} Creates a reference from DOM element back to its StationView instance */
         this.element.dotInstance = this;
     }
     
@@ -73,12 +68,12 @@ export class StationView {
     }
     
     /**
-     * Updates the station name in both the data model and the visible label.
+     * Updates the station label.
      * @param {string} newName - The new name for the station.
      */
     setLabel(newName) {
-        this.stationData.setName(newName);
         this.label.textContent = this.stationData.getName();
+        console.log("Changed label")
     }
     
     /**

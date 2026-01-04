@@ -1,17 +1,20 @@
 // TODO: Implement TrackData
+// TODO: Documentation
+
+import { LineData } from "./LineData.js";
 
 export class TrackData {
     id
-    fromStation
-    toStation
+    stationA
+    stationB
     length
-    line 
+    lineData
 
-    constructor({id, fromStation, toStation, length, line}) {
-        this.id = id;
-        this.fromStation = fromStation;
-        this.toStation = toStation;
-        this.length = length;
-        this.line = line;
+    constructor(stationA, stationB, lineData=null, id=null, length=null) {
+        this.id = id
+        this.stationA = stationA || null;
+        this.stationB = stationB || null;
+        this.length = length || null;
+        this.lineData = lineData || new LineData();
     }
 }
