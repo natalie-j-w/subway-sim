@@ -7,20 +7,23 @@ const varDotSize = parseFloat(
 );
 
 /**
- * Represents the visual representation of a station on the canvas.
+ * Visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
  */
 export class StationView {
+    #x
+    #y
+
     /**
      * Creates a new StationView instance.
      * @param {number} x
      * @param {number} y
      * @param {StationData} stationData
      */
-    constructor(x, y, stationData) {
+    constructor(x=0, y=0, stationData=new StationData()) {
         this.x = x;
         this.y = y;
-        this.stationData = stationData || new StationData();
+        this.stationData = stationData;
 
         /** @type {HTMLDivElement} */
         this.label;
@@ -31,6 +34,18 @@ export class StationView {
         /** @type {StationView} Creates a reference from DOM element back to its StationView instance */
         this.element.dotInstance = this;
     }
+
+    get x() {return this.#x}
+    set x(value) {
+        if (typeof(value) !== 'number') {throw TypeError(`x value ${value} is not a number`)}
+        if (!Number.isFinite(value)) {throw TypeError(`x value ${value} is not a finite number`)}
+        else {this.#x = value}}
+
+    get y() {return this.#y}
+    set y(value) {
+        if (typeof(value) !== 'number') {throw TypeError(`y value ${value} is not a number`)}
+        if (!Number.isFinite(value)) {throw TypeError(`y value ${value} is not a finite number`)}
+        else {this.#y = value}}
     
     /**
      * Creates and configures the DOM elements for the station and its label.
@@ -48,8 +63,8 @@ export class StationView {
         label.textContent = this.stationData.getName();
         
         stationDot.style.position = 'absolute';
-        stationDot.style.left = `${this.x - varDotSize / 2}px`;
-        stationDot.style.top  = `${this.y - varDotSize / 2}px`;
+        stationDot.style.left = `${this.#x - varDotSize / 2}px`;
+        stationDot.style.top  = `${this.#y - varDotSize / 2}px`;
         
         stationDot.appendChild(label);
         return stationDot;
@@ -60,18 +75,16 @@ export class StationView {
      * @param {number} newX - New X coordinate (center of station dot)
      * @param {number} newY - New Y coordinate (center of station dot)
      */
-    updatePosition(newX, newY) {
+    updatePosition({newX = this.x, newY = this.y} = {}) {
         this.x = newX;
         this.y  = newY;
+
         this.element.style.left = `${this.x - varDotSize / 2}px`;
         this.element.style.top  = `${this.y - varDotSize / 2}px`;
     }
     
-    /**
-     * Updates the station label.
-     * @param {string} newName - The new name for the station.
-     */
-    setLabel(newName) {
+    /** Updates the station label text to current station name. */
+    updateLabel() {
         this.label.textContent = this.stationData.getName();
         console.log("Changed label")
     }

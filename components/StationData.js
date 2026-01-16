@@ -44,13 +44,13 @@ export class StationData {
      * @returns {Object} Plain object containing station data with public fields.
      * @example {id, name}
      */
-    toDTO () {
-        return {
-            id: this.id,
-            name: this.getName()
-            // TODO: Add connections
-        }
-    }
+    // toDTO () {
+    //     return {
+    //         id: this.id,
+    //         name: this.getName()
+    //         // TODO: toDTO add connections
+    //     }
+    // }
     
     /**
      * Gets the station name.

@@ -3,7 +3,6 @@ import {TrackView } from './components/TrackView.js';
 import {StationData} from './components/StationData.js';
 import { TrackData } from './components/TrackData.js';
 import {CSS_VARS} from './constants.js';
-import { LineData } from './components/LineData.js';
 
 // TODO: Split up main.js into multiple handler files
 
@@ -20,10 +19,10 @@ btnToggleDotLabels.checked = true;
 /** @type {boolean} Global flag for label visibility */
 let showDotLabels = btnToggleDotLabels.checked;
 
-/** @type {StationView|null} Currently dragged station dot instance */
+/** @type {StationView|null} Currently dragged station */
 let draggedStationDot;
 
-/** @type {StationView|null} Currently selected/focused station dot instance */
+/** @type {StationView|null} Currently selected/focused station */
 let selectedStationDot;
 
 /** @type {boolean} Tracks if dragging just occured (prevents mouseup events) */
@@ -108,7 +107,7 @@ container.addEventListener('click', e => {
 */
 addDotListener('click', container, (e, clickedStationDot) => {
     // Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot, draw line between them
-    // FIXME: Dot should not be focussed when clicking twice
+    // FIXME: Dot should not be focussed when double-clicking
     if (selectedStationDot && clickedStationDot != selectedStationDot && e.ctrlKey) {
         console.log("Focussed dot:", selectedStationDot);
         console.log("Ctrl-clicked dot:", clickedStationDot)
@@ -117,6 +116,8 @@ addDotListener('click', container, (e, clickedStationDot) => {
         const stationB = clickedStationDot;
         const trackData = new TrackData(stationA, stationB);
 
+        // TODO: Create functions for adding connections to StationData and TrackData.lineData
+        // (First add connection to TrackData, then add TrackData to Stations)
         stationA.stationData.connections.push(trackData);
         stationB.stationData.connections.push(trackData);
         trackData.lineData.tracks.push(trackData);
@@ -148,7 +149,7 @@ addDotListener('click', container, (e, clickedStationDot) => {
         const new_name_prompt = prompt("Station name:");
         const new_name = (new_name_prompt) ? new_name_prompt : curr_name;
         clickedStationDot.stationData.setName(new_name);
-        clickedStationDot.setLabel(new_name);
+        clickedStationDot.updateLabel();
         console.log("Previous name:", curr_name ,"New name:", clickedStationDot.stationData.getName())
     }
 })
@@ -199,7 +200,7 @@ document.body.addEventListener('mousemove', e => {
         if(newY > canvasHeight) newY = canvasHeight - dotSize;
         if(newY < 0) newY = dotSize;
         
-        draggedStationDot.updatePosition(newX, newY);
+        draggedStationDot.updatePosition({newX: newX, newY: newY});
     }
 })
 

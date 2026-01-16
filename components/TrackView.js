@@ -36,6 +36,10 @@ export class TrackView {
     * @param {TrackData} trackData - Connection metadata.
     */
     constructor(x1, y1, x2, y2, color, trackData) {
+        if ([x1,y1,x2,y2].some(item => {typeof(item) !== Number})) {
+            throw TypeError("Coordinates have to be numbers")
+        }
+
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -72,5 +76,25 @@ export class TrackView {
         line.appendChild(label);
 
         return line;
+    }
+
+    // TODO: Type checking
+    /**
+     * @param {Object} options
+     * @param {number} [options.x1] - Start X coordinate
+     * @param {number} [options.y1] - Start Y coordinate
+     * @param {number} [options.x2] - End X coordinate
+     * @param {number} [options.y2] - End Y coordinate
+     */
+    updateLine({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
+        this.x1 = newX1;
+        this.y1 = newY1;
+        this.x2 = newX2;
+        this.y2 = newY2;
+
+        this.element.setAttribute("x1", String(this.x1));
+        this.element.setAttribute("y1", String(this.y1));
+        this.element.setAttribute("x2", String(this.x2));
+        this.element.setAttribute("y2", String(this.y2));
     }
 }
