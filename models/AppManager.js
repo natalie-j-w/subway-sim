@@ -2,8 +2,9 @@ import {StationPresenter} from "../viewModels/StationPresenter.js"
 import { StationData } from "../models/StationData.js"
 import { StationView } from "../components/StationView.js"
 import { CSS_VARS } from "../constants.js"
+import { Observer } from "../models/Observer.js"
 
-export class AppManager {
+export class AppManager extends Observer {
     /** @type {HTMLElement} */
     container
 
@@ -20,10 +21,10 @@ export class AppManager {
     wasDragging
 
     /** @type {StationPresenter} */
-    draggedStationVM
+    draggedStationPresenter
 
     /** @type {StationPresenter}*/
-    selectedStationVM
+    selectedStationPresenter
 
     /**
      * Creates an instance of AppManager.
@@ -32,16 +33,22 @@ export class AppManager {
      * @param {HTMLElement} canvas - Div element where Stations are placed. Positioned below svg.
      */
     constructor(container, svg, canvas) {
+        super();
         this.container = container;
         this.svg = svg;
         this.canvas = canvas;
         this.showStationLabels = true;
         this.wasDragging = false;
-        this.draggedStationVM = null;
-        this.selectedStationVM = null;
+        this.draggedStationPresenter = null;
+        this.selectedStationPresenter = null;
 
         this.setupEventListeners();
         this.svg.setAttribute('viewBox', `0 0 ${this.canvas.clientWidth} ${this.canvas.clientHeight}`)
+    }
+
+    validatePresenter(presenter) {
+        if (!typeof(presenter) === StationPresenter) {throw TypeError("Presenter has to be of type 'StationPresenter'", presenter)}
+        return presenter;
     }
 
     /**
@@ -52,9 +59,9 @@ export class AppManager {
      * @param {HTMLElement} target - Parent element to attach the delegated listener to
      * @param {StationViewInstanceEventCallback} callback - Called with (event, stationView) when a dot is targeted
      */
-    addDotListener(type, target, callback) {
+    addStationListener(type, target, callback) {
         target.addEventListener(type, (e) => {
-            if (e.target.classList.contains(CSS_VARS.DOT_CLASSNAME)) {
+            if (e.target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 const stationView = e.target.stationViewInstance;
                 callback(e, stationView);
             }
@@ -67,37 +74,39 @@ export class AppManager {
      * @returns {boolean} True if element is either a station dot or track line, false otherwise.
      */
     isInteractiveElement(e) {
-        return e.target.classList.contains(CSS_VARS.DOT_CLASSNAME) ||
-               e.target.classList.contains(CSS_VARS.LINE_CLASSNAME) 
+        return e.target.classList.contains(CSS_VARS.STATION_CLASSNAME) ||
+               e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME) 
     }
 
-    handleStationEvent(eventType, sourceVM) {
+    update(eventType, payload) {
         switch (eventType) {
             case StationPresenter.NOTIFICATION_TYPES.SELECT: {
-                this.selectedStationVM?.deselect();
-                this.selectedStationVM = sourceVM;
+                if (this.selectedStationPresenter && this.selectedStationPresenter !== payload.source) {
+                    console.log("Source is same as current selection:", this.selectedStationPresenter !== payload.source)
+                    this.selectedStationPresenter.deselect();
+                }
+                this.selectedStationPresenter = payload.source;
                 break;
             }
 
             case StationPresenter.NOTIFICATION_TYPES.DESELECT: {
-                this.selectedStationVM?.deselect();
+                this.selectedStationPresenter = null;
                 break;
             }
 
             case StationPresenter.NOTIFICATION_TYPES.START_DRAG: {
-                this.draggedStationVM = sourceVM;
+                this.draggedStationPresenter = payload.source;
                 break;
             }
 
             case StationPresenter.NOTIFICATION_TYPES.END_DRAG: {
-                this.draggedStationVM = null;
+                this.draggedStationPresenter = null;
                 break;
             }
         }
     }
 
     setupEventListeners() {
-
         // Create new station when clicking container
         this.container.addEventListener('click', e => {
             /** Prevents creating new dot after just letting go of dragged dot */
@@ -110,58 +119,57 @@ export class AppManager {
                 this.handleContainerClick(e);
             }
             else {
-                console.log("Clicked interactable element");
+                // console.log("Clicked interactable element");
             }
         });
 
-        // this.document.body.addEventListener('click', (e) => this.handleDocBodyClick(e));
-        // this.addDotListener('click', this.container, (e, clickedStationView) => this.handleStationEvent(e, clickedStationView));
-    }
-
-    handleTrackEvent(eventType, sourceVM) {
-        return;
+        this.addStationListener('click', this.container, 
+            (e, clickedStationPresenter) => this.handleStationClick(e, clickedStationPresenter));
     }
 
     handleContainerClick(e) {
-        console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
+        // Create new station when clicking empty space on canvas
+        // console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
+        if (this.selectedStationPresenter) {
+            this.selectedStationPresenter.deselect();
+        }
         const data = new StationData({coordinateX: e.pageX, coordinateY:e.pageY});
         const station = new StationView(data)
         const presenter = new StationPresenter(data, station);
         station.stationPresenter = presenter;
-        presenter.subscribe(station);
 
-        presenter.reposition(e.pageX, e.pageY);
+        presenter.subscribe(station);
+        presenter.subscribe(this);
+        presenter.reposition();
         presenter.toggleLabelVisibility(this.showStationLabels);
 
         this.canvas.appendChild(station.element);
-        console.log(station)
-    }
-
-    handleDocBodyClick(e) {
-        // Deselect current selected station when clicking outside of any dot
-        if (!e.target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-            this.selectedStationVM.deselect();
-        }
     }
 
     handleStationClick(e, clickedStationView) {
-            const clickedStationVM = clickedStationView.stationViewModel;
+            const clickedStationPresenter = clickedStationView.stationPresenter;
+            // console.log("Clicked station", clickedStationPresenter)
+
+            // Double left-click to change station name
+            if (e.detail == 2) {
+                // e.stopPropagation();
+                clickedStationPresenter.select();
+                const newName = prompt("Enter new station name: ");
+                if (newName) {
+                    clickedStationPresenter.rename(newName);
+                }
+                return;
+            }
 
             // Single left-click (without ctrl key) to see data and focus dot
             if (e.detail == 1 && !e.ctrlKey) {
-                clickedStationVM.select();
+                clickedStationPresenter.select();
                 // }
-            }
-            
-            // Double left-click to change station name
-            if (e.detail == 2) {
-                const newName = prompt("Enter new station name: ");
-                clickedStationVM.rename(newName);
             }
 
             // Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot, draw line between them
             // FIXME: Dot should not be focussed when double-clicking
-            if (this.selectedStationVM && clickedStationVM != this.selectedStationVM && e.ctrlKey) {
+            if (this.selectedStationPresenter && clickedStationPresenter != this.selectedStationPresenter && e.ctrlKey) {
                 // #TODO: TrackViewModel creates connection between stations
                     //     console.log("Focussed dot:", selectedStationDot);
                     //     console.log("Ctrl-clicked dot:", clickedStation)
@@ -181,15 +189,11 @@ export class AppManager {
             }
     }
 
-    stationsConnect(stationAVM, stationBVM) {
+    handleTrackEvent(eventType, sourcePresenter) {
         return;
     }
 
-    createStation() {
-        return;
-    }
-
-    createTrack() {
+    stationsConnect(stationAPresenter, stationBPresenter) {
         return;
     }
 }

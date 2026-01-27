@@ -5,12 +5,13 @@ import {StationPresenter} from "../viewModels/StationPresenter.js"
 
 const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
-        .getPropertyValue('--dot-size')
+        .getPropertyValue('--station-size')
 );
 
 /**
  * Visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
+ * Observes its StationPresenter.
  */
 export class StationView extends Observer {
     stationData
@@ -65,8 +66,12 @@ export class StationView extends Observer {
             }
 
             case StationPresenter.NOTIFICATION_TYPES.REPOSITION: {
-                this.element.style.left = `${this.stationData.coordinateX - varDotSize / 2}px`;
-                this.element.style.top  = `${this.stationData.coordinateY - varDotSize / 2}px`;
+                const x = this.stationData.coordinateX - varDotSize / 2;
+                const y = this.stationData.coordinateY - varDotSize / 2
+                this.element.style.left = `${x}px`;
+                this.element.style.top  = `${y}px`;
+                this.element.style.transform = `translate(-50%, -50%)`;
+                console.log(`Repositioned station ${this.stationData.name} to X:${x} Y:${y}`)
                 break;
             }
             
