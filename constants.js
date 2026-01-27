@@ -1,21 +1,21 @@
 /** CSS variables for use in js.
  * 
- * DON'T RENAME CLASSES HERE WITHOUT FIRST RENAMING THEM IN THEIR RESPECTIVE FILES!
+ * DON'T REDEFINE VARIABLES HERE WITHOUT ALSO RENAMING THEM IN THEIR RESPECTIVE FILES!
 */
 export const CSS_VARS = {
     // Class names for Dot.css
-    DOT_CLASSNAME: 'station-dot',
-    DOT_LABEL_CLASSNAME: 'station-dot__label',
+    STATION_CLASSNAME: 'station-dot',
+    STATION_LABEL_CLASSNAME: 'station-dot__label',
 
-    // Class names for TrackView (TrackView.css)
-    LINE_CLASSNAME: 'connection-line',
-    LINE_LABEL_CLASSNAME: 'connection-line__label',
+    // Class names for TrackView (TrackView.css TBD)
+    TRACK_CLASSNAME: 'connection-line',
+    TRACK_LABEL_CLASSNAME: 'connection-line__label',
 
     // Global constants from main.css
-    DOT_SIZE: '--dot-size',
-    DOT_COLOR: '--dot-color',
-    DOT_BORDER_COLOR: '--dot-border-color',
-    LINE_COLOR: '--line-color'
+    STATION_SIZE: '--station-size',
+    STATION_COLOR: '--station-color',
+    STATION_BORDER_COLOR: '--station-border-color',
+    TRACK_COLOR: '--line-color'
 }
 
 export const JS_VARS = {

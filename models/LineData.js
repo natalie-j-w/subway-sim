@@ -1,4 +1,3 @@
-import { StationData } from "./StationData.js";
 
 // TODO: Implement LineData
 // TODO: Documentation

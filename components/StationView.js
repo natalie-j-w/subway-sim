@@ -1,5 +1,7 @@
 import {CSS_VARS} from '../constants.js'
-import {StationData } from './StationData.js';
+import { StationData } from '../models/StationData.js';
+import { Observer } from '../models/Observer.js';
+import {StationPresenter} from "../viewModels/StationPresenter.js"
 
 const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
@@ -10,19 +12,18 @@ const varDotSize = parseFloat(
  * Visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
  */
-export class StationView {
-    #x
-    #y
+export class StationView extends Observer {
+    stationData
+    label
+    element
+    stationPresenter
 
     /**
      * Creates a new StationView instance.
-     * @param {number} x
-     * @param {number} y
      * @param {StationData} stationData
      */
-    constructor(x=0, y=0, stationData=new StationData()) {
-        this.x = x;
-        this.y = y;
+    constructor(stationData=new StationData()) {
+        super();
         this.stationData = stationData;
 
         /** @type {HTMLDivElement} */
@@ -32,20 +33,8 @@ export class StationView {
         this.element = this.createDOMElement();
 
         /** @type {StationView} Creates a reference from DOM element back to its StationView instance */
-        this.element.dotInstance = this;
+        this.element.stationViewInstance = this;
     }
-
-    get x() {return this.#x}
-    set x(value) {
-        if (typeof(value) !== 'number') {throw TypeError(`x value ${value} is not a number`)}
-        if (!Number.isFinite(value)) {throw TypeError(`x value ${value} is not a finite number`)}
-        else {this.#x = value}}
-
-    get y() {return this.#y}
-    set y(value) {
-        if (typeof(value) !== 'number') {throw TypeError(`y value ${value} is not a number`)}
-        if (!Number.isFinite(value)) {throw TypeError(`y value ${value} is not a finite number`)}
-        else {this.#y = value}}
     
     /**
      * Creates and configures the DOM elements for the station and its label.
@@ -53,47 +42,63 @@ export class StationView {
      * @private
      */
     createDOMElement() {
-        const stationDot = document.createElement('div');
+        const stationElement = document.createElement('div');
         const label = document.createElement('div');
         
-        stationDot.className = CSS_VARS.DOT_CLASSNAME;
-        label.className = CSS_VARS.DOT_LABEL_CLASSNAME;
+        stationElement.className = CSS_VARS.STATION_CLASSNAME;
+        label.className = CSS_VARS.STATION_LABEL_CLASSNAME;
         
         this.label = label;
-        label.textContent = this.stationData.getName();
+        label.textContent = this.stationData.name;
         
-        stationDot.style.position = 'absolute';
-        stationDot.style.left = `${this.#x - varDotSize / 2}px`;
-        stationDot.style.top  = `${this.#y - varDotSize / 2}px`;
+        stationElement.style.position = 'absolute';
         
-        stationDot.appendChild(label);
-        return stationDot;
+        stationElement.appendChild(label);
+        return stationElement;
     }
 
-    /**
-     * Updates the position of the station on the canvas
-     * @param {number} newX - New X coordinate (center of station dot)
-     * @param {number} newY - New Y coordinate (center of station dot)
-     */
-    updatePosition({newX = this.x, newY = this.y} = {}) {
-        this.x = newX;
-        this.y  = newY;
+    update(eventType, payload) {
+        switch(eventType) {
+            case StationPresenter.NOTIFICATION_TYPES.RENAME: {
+                this.label.textContent = this.stationData.name;
+                break;
+            }
 
-        this.element.style.left = `${this.x - varDotSize / 2}px`;
-        this.element.style.top  = `${this.y - varDotSize / 2}px`;
-    }
-    
-    /** Updates the station label text to current station name. */
-    updateLabel() {
-        this.label.textContent = this.stationData.getName();
-        console.log("Changed label")
-    }
-    
-    /**
-     * Toggles the visibility of the station name label.
-     * @param {boolean} value - True to show the label, false to hide it.
-     */
-    toggleLabelVisibility(value) {
-        this.label.style.display = value ? 'block': 'none';
+            case StationPresenter.NOTIFICATION_TYPES.REPOSITION: {
+                this.element.style.left = `${this.stationData.coordinateX - varDotSize / 2}px`;
+                this.element.style.top  = `${this.stationData.coordinateY - varDotSize / 2}px`;
+                break;
+            }
+            
+            case StationPresenter.NOTIFICATION_TYPES.TOGGLE_LABEL_VISIBILITY: {
+                this.label.style.display = payload.value ? 'block': 'none';
+                break;
+            }
+
+            case StationPresenter.NOTIFICATION_TYPES.SELECT: {
+                this.element.classList.add('selected');
+                break;
+            }
+            
+            case StationPresenter.NOTIFICATION_TYPES.DESELECT: {
+                this.element.classList.remove('selected');
+                break;
+            }
+
+            case StationPresenter.NOTIFICATION_TYPES.START_DRAG: {
+                this.element.classList.add('dragging');
+                break;
+            }
+
+            case StationPresenter.NOTIFICATION_TYPES.END_DRAG: {
+                this.element.classList.remove('dragging');
+                break;
+            }
+
+            default: {
+                console.log(`${this.stationData.name} was updated by event ${eventType} with payload: `, payload);
+                break;
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 import { CSS_VARS } from "../constants.js"
-import { TrackData } from "./TrackData.js" 
+import { TrackData } from "../models/TrackData.js" 
 
 // TODO: TrackView Documentation
 
@@ -14,7 +14,7 @@ import { TrackData } from "./TrackData.js"
  * @property {TrackData} trackData - Connection metadata.
  * @property {HTMLDivElement} label - Label of line.
  * @property {HTMLDivElement} element - DOM element of connection line.
- * @property {TrackView} element.trackInstance - Reference to line's instance of TrackView.
+ * @property {TrackView} element.trackInstance - Reference to line element's instance of TrackView.
  */
 export class TrackView {
     x1
@@ -40,15 +40,13 @@ export class TrackView {
             throw TypeError("Coordinates have to be numbers")
         }
 
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
         this.color = color || this.trackData.lineData.color;
         this.trackData = trackData || new TrackData();
+        this.element = this.#createDOMElement()
+        this.updatePosition({newX1: x1, newY1: y1, newX2: x2, newY2: y2})
+
 
         this.#svgNamespace = "http://www.w3.org/2000/svg";
-        this.element = this.#createDOMElement()
         this.label;
         this.element.trackInstance = this;
     }
@@ -62,8 +60,8 @@ export class TrackView {
         const line = document.createElementNS(this.#svgNamespace, "line");
         const label = document.createElement('div');
 
-        line.setAttribute("class", String(CSS_VARS.LINE_CLASSNAME));
-        label.className = CSS_VARS.LINE_LABEL_CLASSNAME;
+        line.setAttribute("class", String(CSS_VARS.TRACK_CLASSNAME));
+        label.className = CSS_VARS.TRACK_LABEL_CLASSNAME;
 
         line.setAttribute("x1", String(this.x1));
         line.setAttribute("y1", String(this.y1));
@@ -79,6 +77,7 @@ export class TrackView {
     }
 
     // TODO: Type checking
+    // TODO: Limit points to canvas
     /**
      * @param {Object} options
      * @param {number} [options.x1] - Start X coordinate
@@ -86,7 +85,7 @@ export class TrackView {
      * @param {number} [options.x2] - End X coordinate
      * @param {number} [options.y2] - End Y coordinate
      */
-    updateLine({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
+    updatePosition({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
         this.x1 = newX1;
         this.y1 = newY1;
         this.x2 = newX2;
