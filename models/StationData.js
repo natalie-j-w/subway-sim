@@ -10,7 +10,7 @@ export class StationData {
     id
     
     /** @type {string}*/
-    name
+    #name
 
     /** @type {number} */
     coordinateX
@@ -29,9 +29,17 @@ export class StationData {
     */
     constructor({id = 0, name = "Unnamed", coordinateX = 0, coordinateY = 0}) {
         this.id = this.validateId(id);
-        this.name = this.validateName(name);
+        this.#name = this.validateName(name);
         this.coordinateX = this.validateCoordinate(coordinateX);
         this.coordinateY = this.validateCoordinate(coordinateY);
+    }
+
+    set name(newName) {
+        this.#name = this.validateName(newName);
+    }
+
+    get name() {
+        return this.#name;
     }
     
     // Field validation
@@ -42,8 +50,11 @@ export class StationData {
      * @param {string} newName
      */
     validateName(newName) {
-        if (newName.length > JS_VARS.STATION_NAME_MAXLENGTH) {
+        if (newName && newName.length > JS_VARS.STATION_NAME_MAXLENGTH) {
             return newName.substring(0, JS_VARS.STATION_NAME_MAXLENGTH-1); 
+        }
+        if (!newName) {
+            return this.name;
         }
 
         return newName;
