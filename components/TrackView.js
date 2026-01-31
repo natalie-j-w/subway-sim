@@ -1,5 +1,6 @@
 import { CSS_VARS } from "../constants.js"
 import { TrackData } from "../models/TrackData.js" 
+import { TrackPresenter } from "../presenters/TrackPresenter.js"
 
 // TODO: TrackView Documentation
 
@@ -12,6 +13,7 @@ import { TrackData } from "../models/TrackData.js"
 *  @property {number} y2 - Y Position of the end of the line on the canvas.
  * @property {string} color - Line color.
  * @property {TrackData} trackData - Connection metadata.
+ * @property {TrackPresenter} trackPresenter
  * @property {HTMLDivElement} label - Label of line.
  * @property {HTMLDivElement} element - DOM element of connection line.
  * @property {TrackView} element.trackInstance - Reference to line element's instance of TrackView.
@@ -22,10 +24,11 @@ export class TrackView {
     x2
     y2
     color
-    trackData
     #svgNamespace
     element
     label
+    trackData
+    trackPresenter
 
     /** Creates a new LineView instance
     * @param {number} x1 - X Position of the beginning of the line on the canvas.
@@ -76,6 +79,26 @@ export class TrackView {
         return line;
     }
 
+    update(eventType, payload) {
+        switch (eventType) {
+            case (TrackPresenter.NOTIFICATION_TYPES.SELECT): {
+                break;
+            }
+            case (TrackPresenter.NOTIFICATION_TYPES.DESELECT): {
+                break;
+            }
+            case (TrackPresenter.NOTIFICATION_TYPES.REPOSITION): {
+                break;
+            }
+            case (TrackPresenter.NOTIFICATION_TYPES.TOGGLE_LABEL_VISIBILITY): {
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
     // TODO: Type checking
     // TODO: Limit points to canvas
     /**
@@ -85,15 +108,15 @@ export class TrackView {
      * @param {number} [options.x2] - End X coordinate
      * @param {number} [options.y2] - End Y coordinate
      */
-    updatePosition({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
-        this.x1 = newX1;
-        this.y1 = newY1;
-        this.x2 = newX2;
-        this.y2 = newY2;
+    // updatePosition({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
+    //     this.x1 = newX1;
+    //     this.y1 = newY1;
+    //     this.x2 = newX2;
+    //     this.y2 = newY2;
 
-        this.element.setAttribute("x1", String(this.x1));
-        this.element.setAttribute("y1", String(this.y1));
-        this.element.setAttribute("x2", String(this.x2));
-        this.element.setAttribute("y2", String(this.y2));
-    }
+    //     this.element.setAttribute("x1", String(this.x1));
+    //     this.element.setAttribute("y1", String(this.y1));
+    //     this.element.setAttribute("x2", String(this.x2));
+    //     this.element.setAttribute("y2", String(this.y2));
+    // }
 }
