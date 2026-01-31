@@ -1,7 +1,7 @@
 import {CSS_VARS} from '../constants.js'
 import { StationData } from '../models/StationData.js';
 import { Observer } from '../models/Observer.js';
-import {StationPresenter} from "../viewModels/StationPresenter.js"
+import {StationPresenter} from "../presenters/StationPresenter.js"
 
 const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
@@ -11,7 +11,7 @@ const varDotSize = parseFloat(
 /**
  * Visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
- * Observes its StationPresenter.
+ * Observes and references its StationPresenter.
  */
 export class StationView extends Observer {
     stationData
@@ -71,7 +71,7 @@ export class StationView extends Observer {
                 this.element.style.left = `${x}px`;
                 this.element.style.top  = `${y}px`;
                 this.element.style.transform = `translate(-50%, -50%)`;
-                console.log(`Repositioned station ${this.stationData.name} to X:${x} Y:${y}`)
+                // console.log(`Repositioned station ${this.stationData.name} to X:${x} Y:${y}`)
                 break;
             }
             
