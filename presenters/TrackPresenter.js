@@ -1,5 +1,45 @@
-import { Observable } from "../models/Observable";
+import { Observable } from "../models/Observable.js";
 
+
+/**
+ * Presenter that mediates between TrackData (model) and TrackView (view).
+ * 
+ * Responsibilities:
+ * - Manages track state (selection, label visibility)
+ * - Updates TrackData in response to user actions
+ * - Notifies observers (TrackView, AppManager) of state changes
+ * - Handles track repositioning when connected stations move
+ * 
+ * Architecture:
+ * - Extends Observable to notify observers when track state changes
+ * - Owns references to both TrackData and TrackView
+ * - Only this Presenter should modify TrackData; Views should only read
+ * 
+ * Notification Flow:
+ * 1. User action or station movement triggers Presenter method
+ * 2. Presenter updates internal state and/or TrackData
+ * 3. Presenter notifies all observers via notify(eventType, payload)
+ * 4. TrackView updates SVG line, AppManager updates app state
+ * 
+ * Track Positioning:
+ * - Tracks connect two stations and must update when either station moves
+ * - Connected stations should notify their tracks to reposition
+ * - Track coordinates are derived from station positions
+ * 
+ * @example
+ * const trackData = new TrackData(stationA, stationB, lineData);
+ * const trackView = new TrackView(trackData, color);
+ * const presenter = new TrackPresenter(trackData, trackView);
+ * 
+ * // Subscribe observers
+ * presenter.subscribe(trackView);
+ * presenter.subscribe(appManager);
+ * 
+ * // User actions
+ * presenter.select();                    // Notifies observers with SELECT event
+ * presenter.toggleLabelVisibility(true); // Shows/hides line name label
+ * presenter.reposition(x1, y1, x2, y2);  // Updates track endpoints
+ */
 export class TrackPresenter extends Observable {
     static NOTIFICATION_TYPES = Object.freeze({
         SELECT: "track:select",
@@ -17,6 +57,7 @@ export class TrackPresenter extends Observable {
     labelIsVisible
 
     constructor(trackData, trackView) {
+        super();
         this.trackData = trackData;
         this.trackView = trackView;
         this.isSelected = false;
@@ -52,10 +93,10 @@ export class TrackPresenter extends Observable {
         console.log(`Toggled station label visibility of '${this.stationData.name}' to ${val}`, this);
     }
 
-    reposition(coordX = this.stationData.coordinateX, coordY = this.stationData.coordinateY) {
-        console.log(`Notif: Reposition station to X:${this.stationData.coordinateX} Y:${this.stationData.coordinateY}`, this)
-        this.stationData.coordinateX = coordX;
-        this.stationData.coordinateY = coordY;
+    reposition() {
+        // console.log(`Notif: Reposition station to X:${this.stationData.coordinateX} Y:${this.stationData.coordinateY}`, this)
+        // TODO: TrackPresenter reposition logic
+        
         this.notify(StationPresenter.
             NOTIFICATION_TYPES.REPOSITION, 
             {source: this});

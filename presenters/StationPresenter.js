@@ -3,9 +3,37 @@ import { Observable } from "../models/Observable.js";
 import { StationData } from "../models/StationData.js";
 
 /**
- * #TODO: Proper documentation
- * ViewModel that couples StationView to StationData.
- * Only sends payload when data outside of StationData is needed.
+ * Presenter that mediates between StationData (model) and StationView (view).
+ * 
+ * Responsibilities:
+ * - Manages station state (selection, dragging, label visibility)
+ * - Updates StationData in response to user actions
+ * - Notifies observers (StationView, AppManager) of state changes
+ * 
+ * Architecture:
+ * - Extends Observable to notify observers when station state changes
+ * - Owns references to both StationData and StationView
+ * - Only this Presenter should modify StationData; Views should only read
+ * 
+ * Notification Flow:
+ * 1. User action triggers Presenter method (e.g., select(), rename())
+ * 2. Presenter updates internal state and/or StationData
+ * 3. Presenter notifies all observers via notify(eventType, payload)
+ * 4. StationView updates DOM, AppManager updates app state
+ * 
+ * @example
+ * const data = new StationData({name: "Central Station"});
+ * const view = new StationView(data);
+ * const presenter = new StationPresenter(data, view);
+ * 
+ * // Subscribe observers
+ * presenter.subscribe(view);
+ * presenter.subscribe(appManager);
+ * 
+ * // User actions
+ * presenter.select();           // Notifies observers with SELECT event
+ * presenter.rename("Downtown");  // Updates data, notifies with RENAME event
+ * presenter.reposition(100, 50); // Updates coordinates, notifies with REPOSITION
  */
 export class StationPresenter extends Observable {
     static NOTIFICATION_TYPES = Object.freeze({

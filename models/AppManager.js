@@ -1,8 +1,11 @@
-import {StationPresenter} from "../presenters/StationPresenter.js"
+import { StationPresenter } from "../presenters/StationPresenter.js"
 import { StationData } from "../models/StationData.js"
 import { StationView } from "../components/StationView.js"
 import { CSS_VARS } from "../constants.js"
 import { Observer } from "../models/Observer.js"
+import { TrackData } from "./TrackData.js"
+import { TrackView } from "../components/TrackView.js"
+import { TrackPresenter } from "../presenters/TrackPresenter.js"
 
 export class AppManager extends Observer {
     /** @type {HTMLElement} */
@@ -34,7 +37,6 @@ export class AppManager extends Observer {
 
     /** @type StationPresenter Saves clicked station presenter before dragging operation is started */
     grabbedStationPresenter;
-
 
     /**
      * Creates an instance of AppManager.
@@ -110,6 +112,15 @@ export class AppManager extends Observer {
                 this.draggedStationPresenter = null;
                 break;
             }
+            
+            // TODO: AppManager track event notifs
+            case TrackPresenter.NOTIFICATION_TYPES.SELECT: {
+                break;
+            }
+
+            case TrackPresenter.NOTIFICATION_TYPES.DESELECT: {
+                break;
+            }
         }
     }
 
@@ -134,10 +145,10 @@ export class AppManager extends Observer {
             (e, clickedStationView) => this.handleStationClick(e, clickedStationView.stationPresenter));
 
         this.addStationListener('mousedown', this.container, 
-            (e, clickedStationView) => this.handleStationGrab(e, clickedStationView.stationPresenter));
+            (e, clickedStationView) => this.grabStation(e, clickedStationView.stationPresenter));
 
-        document.body.addEventListener('mousemove', e => this.handleStationMove(e));
-        document.body.addEventListener('mouseup', e => this.handleStationDrop());
+        document.body.addEventListener('mousemove', e => this.moveStation(e));
+        document.body.addEventListener('mouseup', e => this.dropStation());
     }
 
     handleContainerClick(e) {
@@ -166,14 +177,13 @@ export class AppManager extends Observer {
             /** Double left-click to change station name */
             if (e.detail == 2) {
                 e.stopPropagation();
-                this.handleStationDrop();
-                clickedStationPresenter.select();
+                this.dropStation();
                 const newName = prompt("Enter new station name: ");
                 if (newName) {
                     clickedStationPresenter.rename(newName);
                 }
                 this.clickedStationPresenter = null;
-                this.handleStationDrop();
+                this.dropStation();
                 return;
             }
 
@@ -184,28 +194,12 @@ export class AppManager extends Observer {
             }
 
             /** #TODO: Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot, draw line between them */
-            // FIXME: Dot should not be focussed when double-clicking
             if (this.selectedStationPresenter && clickedStationPresenter != this.selectedStationPresenter && e.ctrlKey) {
-                // #TODO: TrackViewModel creates connection between stations
-                    //     console.log("Focussed dot:", selectedStationDot);
-                    //     console.log("Ctrl-clicked dot:", clickedStation)
-                
-                    //     const stationA = selectedStationDot; 
-                    //     const stationB = clickedStation;
-                    //     const trackData = new TrackData(stationA, stationB);
-                
-                    //     const trackView = new TrackView(
-                    //         stationA.x, stationA.y, 
-                    //         stationB.x, stationB.y, 
-                    //         trackData.lineData.color, trackData);
-                    //     svg.appendChild(trackView.element);
-                
-                    //     console.log(`Created track from ${stationA.stationData.name} to ${stationB.stationData.name} with line ${trackData.lineData.name}`);
-                    //     console.log("Track:", trackData);
+                this.connectStations(this.selectedStationPresenter, clickedStationPresenter)
             }
     }
 
-    handleStationGrab(e, clickedStationPresenter) {
+    grabStation(e, clickedStationPresenter) {
         e.preventDefault();
         this.mouseDownPos = {x: e.pageX, y: e.pageY};
         this.grabbedStationPresenter = clickedStationPresenter;
@@ -213,7 +207,7 @@ export class AppManager extends Observer {
         this.dragStarted = false;
     };
 
-    handleStationMove(e) {
+    moveStation(e) {
         if (this.grabbedStationPresenter && !this.dragStarted) {
             var x1 = e.pageX;
             var y1 = e.pageY;
@@ -230,11 +224,11 @@ export class AppManager extends Observer {
         }
 
         if (this.draggedStationPresenter && this.dragStarted) {
-            this.draggedStationPresenter.reposition(e.pageX, e.pageY);
+                this.draggedStationPresenter.reposition(e.pageX, e.pageY);
         }
     }
 
-    handleStationDrop() {
+    dropStation() {
         if (this.draggedStationPresenter && this.dragStarted) {
             this.draggedStationPresenter.endDrag();
             this.dragStarted = false;
@@ -245,11 +239,29 @@ export class AppManager extends Observer {
         this.grabbedStationPresenter = null;
     }
 
-    handleTrackEvent(eventType, sourcePresenter) {
-        return;
+    connectStations(stationAPresenter, stationBPresenter) {
+        const trackData = new TrackData(stationAPresenter, stationBPresenter);
+        const trackView = new TrackView(trackData);
+
+        // #TODO: TrackViewModel creates connection between stations
+        //     console.log("Focussed dot:", selectedStationDot);
+        //     console.log("Ctrl-clicked dot:", clickedStation)
+    
+        //     const stationA = selectedStationDot; 
+        //     const stationB = clickedStation;
+        //     const trackData = new TrackData(stationA, stationB);
+    
+        //     const trackView = new TrackView(
+        //         stationA.x, stationA.y, 
+        //         stationB.x, stationB.y, 
+        //         trackData.lineData.color, trackData);
+        //     svg.appendChild(trackView.element);
+    
+        //     console.log(`Created track from ${stationA.stationData.name} to ${stationB.stationData.name} with line ${trackData.lineData.name}`);
+        //     console.log("Track:", trackData);
     }
 
-    stationsConnect(stationAPresenter, stationBPresenter) {
+    handleTrackEvent(eventType, sourcePresenter) {
         return;
     }
 }
