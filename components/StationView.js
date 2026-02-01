@@ -5,13 +5,17 @@ import {StationPresenter} from "../presenters/StationPresenter.js"
 
 const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
-        .getPropertyValue('--station-size')
+        .getPropertyValue(CSS_VARS.STATION_SIZE);
 );
 
 /**
  * Visual representation of a station on the canvas.
  * Manages the DOM element, positioning, and label visibility for a station dot.
  * Observes and references its StationPresenter.
+ * @property {StationData} stationData
+ * @property {StationPresenter} stationPresenter
+ * @property {HTMLDivElement} label
+ * @property {HTMLDivElement} element
  */
 export class StationView extends Observer {
     stationData
@@ -26,9 +30,6 @@ export class StationView extends Observer {
     constructor(stationData=new StationData()) {
         super();
         this.stationData = stationData;
-
-        /** @type {HTMLDivElement} */
-        this.label;
 
         /** @type {HTMLDivElement} */
         this.element = this.createDOMElement();

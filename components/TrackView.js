@@ -1,56 +1,39 @@
 import { CSS_VARS } from "../constants.js"
 import { TrackData } from "../models/TrackData.js" 
 import { TrackPresenter } from "../presenters/TrackPresenter.js"
+import { Observer } from "../models/Observer.js"
 
 // TODO: TrackView Documentation
 
 /**
- * Visual representation of a connection between dots on the canvas.
- * Manages the DOM element, positioning, and label visibility for a track line.
- * @property {number} x1 - X Position of the beginning of the line on the canvas.
- * @property {number} y1 - Y Position of the beginning of the line on the canvas.
- * @property {number} x2 - X Position of the end of the line on the canvas.
-*  @property {number} y2 - Y Position of the end of the line on the canvas.
+ * Visual representation of a connection between Stations on the canvas.
+ * Manages the DOM element, positioning, and label visibility for a Track line.
+ * Observes and references its TrackPresenter.
  * @property {string} color - Line color.
- * @property {TrackData} trackData - Connection metadata.
+ * @property {TrackData} trackData - Referenced connection metadata.
  * @property {TrackPresenter} trackPresenter
- * @property {HTMLDivElement} label - Label of line.
+ * @property {TrackPresenter} Referenced presenter.
+ * @property {HTMLDivElement} label - Label of track.
  * @property {HTMLDivElement} element - DOM element of connection line.
  * @property {TrackView} element.trackInstance - Reference to line element's instance of TrackView.
  */
-export class TrackView {
-    x1
-    y1
-    x2
-    y2
+export class TrackView extends Observer {
     color
-    #svgNamespace
     element
     label
     trackData
     trackPresenter
 
-    /** Creates a new LineView instance
-    * @param {number} x1 - X Position of the beginning of the line on the canvas.
-    * @param {number} y1 - Y Position of the beginning of the line on the canvas.
-    * @param {number} x2 - X Position of the end of the line on the canvas.
-    * @param {number} y2 - Y Position of the end of the line on the canvas.
-    * @param {string} color - Line color.
+    static SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+    /** Creates a new TrackView instance.
     * @param {TrackData} trackData - Connection metadata.
+    * @param {string} color - Track color. Default: Default color of assigned line.
     */
-    constructor(x1, y1, x2, y2, color, trackData) {
-        if ([x1,y1,x2,y2].some(item => {typeof(item) !== Number})) {
-            throw TypeError("Coordinates have to be numbers")
-        }
-
-        this.color = color || this.trackData.lineData.color;
-        this.trackData = trackData || new TrackData();
+    constructor(trackData, color = this.trackData.lineData.color) {
+        this.trackData = trackData;
+        this.color = color;
         this.element = this.#createDOMElement()
-        this.updatePosition({newX1: x1, newY1: y1, newX2: x2, newY2: y2})
-
-
-        this.#svgNamespace = "http://www.w3.org/2000/svg";
-        this.label;
         this.element.trackInstance = this;
     }
 
@@ -60,7 +43,7 @@ export class TrackView {
      * @private
      */
     #createDOMElement() {
-        const line = document.createElementNS(this.#svgNamespace, "line");
+        const line = document.createElementNS(this.SVG_NAMESPACE, "line");
         const label = document.createElement('div');
 
         line.setAttribute("class", String(CSS_VARS.TRACK_CLASSNAME));
@@ -98,25 +81,4 @@ export class TrackView {
             }
         }
     }
-
-    // TODO: Type checking
-    // TODO: Limit points to canvas
-    /**
-     * @param {Object} options
-     * @param {number} [options.x1] - Start X coordinate
-     * @param {number} [options.y1] - Start Y coordinate
-     * @param {number} [options.x2] - End X coordinate
-     * @param {number} [options.y2] - End Y coordinate
-     */
-    // updatePosition({newX1=this.x1, newY1=this.y1, newX2=this.x2, newY2=this.y2} = {}) {
-    //     this.x1 = newX1;
-    //     this.y1 = newY1;
-    //     this.x2 = newX2;
-    //     this.y2 = newY2;
-
-    //     this.element.setAttribute("x1", String(this.x1));
-    //     this.element.setAttribute("y1", String(this.y1));
-    //     this.element.setAttribute("x2", String(this.x2));
-    //     this.element.setAttribute("y2", String(this.y2));
-    // }
 }
