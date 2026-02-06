@@ -1,11 +1,11 @@
-import { StationPresenter } from "../presenters/StationPresenter.js"
-import { StationData } from "../models/StationData.js"
+import { StationPresenter } from "./presenters/StationPresenter.js"
+import { StationData } from "./models/StationData.js"
 import { StationView } from "../components/StationView.js"
-import { CSS_VARS } from "../constants.js"
-import { Observer } from "../models/Observer.js"
-import { TrackData } from "./TrackData.js"
+import { CSS_VARS } from "./constants.js"
+import { Observer } from "./models/Observer.js"
+import { TrackData } from "./models/TrackData.js"
 import { TrackView } from "../components/TrackView.js"
-import { TrackPresenter } from "../presenters/TrackPresenter.js"
+import { TrackPresenter } from "./presenters/TrackPresenter.js"
 
 export class AppManager extends Observer {
     /** @type {HTMLElement} */

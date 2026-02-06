@@ -1,4 +1,4 @@
-import { AppManager } from './models/AppManager.js';
+import { AppManager } from '../AppManager.js';
 
 // TODO: Split up main.js into multiple handler files
 
