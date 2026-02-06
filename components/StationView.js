@@ -5,7 +5,7 @@ import {StationPresenter} from "../presenters/StationPresenter.js"
 
 const varDotSize = parseFloat(
     getComputedStyle(document.documentElement)
-        .getPropertyValue(CSS_VARS.STATION_SIZE);
+        .getPropertyValue(CSS_VARS.STATION_SIZE)
 );
 
 /**
@@ -32,7 +32,7 @@ export class StationView extends Observer {
         this.stationData = stationData;
 
         /** @type {HTMLDivElement} */
-        this.element = this.createDOMElement();
+        this.element = this.#createDOMElement();
 
         /** @type {StationView} Creates a reference from DOM element back to its StationView instance */
         this.element.stationViewInstance = this;
@@ -43,7 +43,7 @@ export class StationView extends Observer {
      * @returns {HTMLDivElement} The dot element with label attached.
      * @private
      */
-    createDOMElement() {
+    #createDOMElement() {
         const stationElement = document.createElement('div');
         const label = document.createElement('div');
         

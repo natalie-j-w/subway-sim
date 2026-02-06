@@ -1,4 +1,7 @@
+import { TrackView } from "../components/TrackView.js";
 import { Observable } from "../models/Observable.js";
+import { Observer } from "../models/Observer.js";
+import { TrackData } from "../models/TrackData.js";
 
 
 /**
@@ -56,6 +59,11 @@ export class TrackPresenter extends Observable {
     isDragging
     labelIsVisible
 
+    /**
+     * Creates a new instance of TrackPresenter.
+     * @param {TrackData} trackData 
+     * @param {TrackView} trackView 
+     */
     constructor(trackData, trackView) {
         super();
         this.trackData = trackData;
@@ -63,6 +71,9 @@ export class TrackPresenter extends Observable {
         this.isSelected = false;
         this.isDragging = false;
         this.labelIsVisible = true;
+
+        this.trackData.stationAPresenter.subscribe(this);
+        this.trackData.stationBPresenter.subscribe(this);
     }
 
 
@@ -93,12 +104,15 @@ export class TrackPresenter extends Observable {
         console.log(`Toggled station label visibility of '${this.stationData.name}' to ${val}`, this);
     }
 
-    reposition() {
-        // console.log(`Notif: Reposition station to X:${this.stationData.coordinateX} Y:${this.stationData.coordinateY}`, this)
-        // TODO: TrackPresenter reposition logic
-        
-        this.notify(StationPresenter.
-            NOTIFICATION_TYPES.REPOSITION, 
-            {source: this});
+    reposition(coordinates = {} = {x1:this.trackData.x1, y1: this.trackData.y1, x2: this.trackData.x2, y2: this.trackData.y2}) {
+        console.log("Repositioned line to", coordinates);
+        this.trackData.x1 = coordinates.x1;
+        this.trackData.y1 = coordinates.y1;
+        this.trackData.x2 = coordinates.x2;
+        this.trackData.y2 = coordinates.y2;
+
+        this.notify(
+            TrackPresenter.NOTIFICATION_TYPES.REPOSITION, 
+            {source: this, x1: coordinates.x1, y1: coordinates.y1, x2: coordinates.x2, y2: coordinates.y2});
     }
 }

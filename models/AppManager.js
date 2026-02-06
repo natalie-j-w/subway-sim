@@ -52,6 +52,15 @@ export class AppManager extends Observer {
         this.svg.setAttribute('viewBox', `0 0 ${this.canvas.clientWidth} ${this.canvas.clientHeight}`)
 
         this.setupEventListeners();
+
+        const line = document.createElementNS(TrackView.SVG_NAMESPACE, "line");
+        line.setAttribute("x1", String(10));
+        line.setAttribute("y1", String(10));
+        line.setAttribute("x2", String(40));
+        line.setAttribute("y2", String(40));
+        line.setAttribute("stroke", "green");
+        line.setAttribute("stroke-width", "2");
+        this.svg.appendChild(line)
     }
 
     // TODO: Always validate presenter?
@@ -145,30 +154,29 @@ export class AppManager extends Observer {
             (e, clickedStationView) => this.handleStationClick(e, clickedStationView.stationPresenter));
 
         this.addStationListener('mousedown', this.container, 
-            (e, clickedStationView) => this.grabStation(e, clickedStationView.stationPresenter));
+            (e, clickedStationView) => {
+                const clickedStationPresenter = clickedStationView.stationPresenter;
+
+                /** Select one station then ctrl+click another to connect them */
+                if (this.selectedStationPresenter && clickedStationPresenter != this.selectedStationPresenter && e.ctrlKey) {
+                    this.connectStations(this.selectedStationPresenter, clickedStationPresenter);
+                }
+                
+                else {
+                    this.grabStation(e, clickedStationPresenter);
+                }
+            });
 
         document.body.addEventListener('mousemove', e => this.moveStation(e));
         document.body.addEventListener('mouseup', e => this.dropStation());
     }
 
     handleContainerClick(e) {
-        /** Create new station when clicking empty space on canvas */
         // console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
-        if (this.selectedStationPresenter) {
-            this.selectedStationPresenter.deselect();
-        }
-        const data = new StationData({coordinateX: e.pageX, coordinateY:e.pageY});
-        const station = new StationView(data)
-        const presenter = new StationPresenter(data, station);
-        station.stationPresenter = presenter;
+        if (this.selectedStationPresenter) this.selectedStationPresenter.deselect();
 
-        presenter.subscribe(station);
-        presenter.subscribe(this);
-        presenter.reposition();
-        presenter.toggleLabelVisibility(this.showStationLabels);
-
-        this.canvas.appendChild(station.element);
-        presenter.select();
+        /** Create new station when clicking empty space on canvas */
+        if (!e.ctrlKey) this.createStation(e);
     }
 
     handleStationClick(e, clickedStationPresenter) {
@@ -193,10 +201,21 @@ export class AppManager extends Observer {
                 // }
             }
 
-            /** #TODO: Connect two dots by left-clicking and focusing one dot, then Ctrl+left-clicking another (unfocused) dot, draw line between them */
-            if (this.selectedStationPresenter && clickedStationPresenter != this.selectedStationPresenter && e.ctrlKey) {
-                this.connectStations(this.selectedStationPresenter, clickedStationPresenter)
-            }
+    }
+
+    createStation(e) {
+        const data = new StationData({coordinateX: e.pageX, coordinateY:e.pageY});
+        const station = new StationView(data)
+        const presenter = new StationPresenter(data, station);
+        station.stationPresenter = presenter;
+
+        presenter.subscribe(station);
+        presenter.subscribe(this);
+        presenter.reposition();
+        presenter.toggleLabelVisibility(this.showStationLabels);
+
+        this.canvas.appendChild(station.element);
+        presenter.select();
     }
 
     grabStation(e, clickedStationPresenter) {
@@ -205,6 +224,7 @@ export class AppManager extends Observer {
         this.grabbedStationPresenter = clickedStationPresenter;
         clickedStationPresenter.select();
         this.dragStarted = false;
+        // console.log("Grabbed station, ", this.grabbedStationPresenter)
     };
 
     moveStation(e) {
@@ -242,23 +262,15 @@ export class AppManager extends Observer {
     connectStations(stationAPresenter, stationBPresenter) {
         const trackData = new TrackData(stationAPresenter, stationBPresenter);
         const trackView = new TrackView(trackData);
+        const trackPresenter = new TrackPresenter(trackData, trackView);
 
-        // #TODO: TrackViewModel creates connection between stations
-        //     console.log("Focussed dot:", selectedStationDot);
-        //     console.log("Ctrl-clicked dot:", clickedStation)
-    
-        //     const stationA = selectedStationDot; 
-        //     const stationB = clickedStation;
-        //     const trackData = new TrackData(stationA, stationB);
-    
-        //     const trackView = new TrackView(
-        //         stationA.x, stationA.y, 
-        //         stationB.x, stationB.y, 
-        //         trackData.lineData.color, trackData);
-        //     svg.appendChild(trackView.element);
-    
-        //     console.log(`Created track from ${stationA.stationData.name} to ${stationB.stationData.name} with line ${trackData.lineData.name}`);
-        //     console.log("Track:", trackData);
+        trackView.trackPresenter = trackPresenter;
+        trackPresenter.subscribe(trackView);
+        trackPresenter.subscribe(this);
+
+        this.svg.appendChild(trackView.element);
+        console.log("Added new track", trackView.element)
+        console.log(this.svg.childNodes)
     }
 
     handleTrackEvent(eventType, sourcePresenter) {

@@ -1,10 +1,14 @@
-export class Observable {
+import { Observer } from "./Observer.js";
+
+export class Observable extends Observer {
     observers;
 
     constructor() {
+        super();
         this.observers = []
     }
 
+    /** Subscribes an observer */
     subscribe(observer) {
         if (!this.observers.includes(observer)) {
             this.observers.push(observer);

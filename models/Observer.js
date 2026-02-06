@@ -4,6 +4,6 @@ export class Observer {
     }
 
     update(eventType, payload) {
-        console.log(`${this.name} was updated by event ${eventType} with payload: `, payload);
+        // console.log(this, `was updated by event ${eventType} with payload: `, payload);
     }
 }

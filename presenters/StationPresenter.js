@@ -89,7 +89,7 @@ export class StationPresenter extends Observable {
         this.notify(
             StationPresenter.NOTIFICATION_TYPES.DESELECT, 
             {source: this});
-        console.log(`Deselected station '${this.stationData.name}' `, this);
+        // console.log(`Deselected station '${this.stationData.name}' `, this);
     }
 
     toggleLabelVisibility(val) {

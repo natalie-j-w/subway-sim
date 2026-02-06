@@ -1,4 +1,3 @@
-import { CSS_VARS } from "../constants.js"
 import { TrackData } from "../models/TrackData.js" 
 import { TrackPresenter } from "../presenters/TrackPresenter.js"
 import { Observer } from "../models/Observer.js"
@@ -30,11 +29,13 @@ export class TrackView extends Observer {
     * @param {TrackData} trackData - Connection metadata.
     * @param {string} color - Track color. Default: Default color of assigned line.
     */
-    constructor(trackData, color = this.trackData.lineData.color) {
+    constructor(trackData, color = undefined) {
+        super();
         this.trackData = trackData;
-        this.color = color;
+        this.color = color || this.trackData.lineData.color;
         this.element = this.#createDOMElement()
         this.element.trackInstance = this;
+        this.syncCoordinates();
     }
 
     /**
@@ -43,19 +44,20 @@ export class TrackView extends Observer {
      * @private
      */
     #createDOMElement() {
+        console.log(this.trackData.x1, this.trackData.y1, this.trackData.x2, this.trackData.y2)
         const line = document.createElementNS(this.SVG_NAMESPACE, "line");
         const label = document.createElement('div');
 
-        line.setAttribute("class", String(CSS_VARS.TRACK_CLASSNAME));
-        label.className = CSS_VARS.TRACK_LABEL_CLASSNAME;
+        // line.setAttribute("class", String(CSS_VARS.TRACK_CLASSNAME));
+        // label.className = CSS_VARS.TRACK_LABEL_CLASSNAME;
 
-        line.setAttribute("x1", String(this.x1));
-        line.setAttribute("y1", String(this.y1));
-        line.setAttribute("x2", String(this.x2));
-        line.setAttribute("y2", String(this.y2));
+        line.setAttribute("x1", String(this.trackData.x1));
+        line.setAttribute("y1", String(this.trackData.y1));
+        line.setAttribute("x2", String(this.trackData.x2));
+        line.setAttribute("y2", String(this.trackData.y2));
         line.setAttribute("stroke", String(this.color));
         line.setAttribute("stroke-width", "2");
-        label.textContent = this.trackData.lineData.name;
+        // label.textContent = this.trackData.lineData.name;
 
         line.appendChild(label);
 

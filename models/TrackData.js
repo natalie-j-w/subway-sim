@@ -10,20 +10,24 @@ export class TrackData {
     stationBPresenter
     length
     lineData
+    x1
+    y1
+    x2
+    y2
 
     /**
      * Creates a new TrackData instance.
-     * @param {StationPresenter} stationA 
-     * @param {StationPresenter} stationB 
+     * @param {StationPresenter} stationAPresenter 
+     * @param {StationPresenter} stationBPresenter 
      * @param {LineData} lineData 
      * @param {integer} id 
      * @param {number} length 
      */
-    constructor(stationA, stationB, lineData=null, id=null, length=null) {
+    constructor(stationAPresenter, stationBPresenter, lineData= new LineData(), id=null, length=null) {
         this.id = id
-        this.stationAPresenter = stationA || null;
-        this.stationBPresenter = stationB || null;
-        this.length = length || null;
-        this.lineData = lineData || new LineData();
+        this.lineData = lineData;
+        this.stationAPresenter = stationAPresenter;
+        this.stationBPresenter = stationBPresenter;
+        this.length = length;
     }
 }
