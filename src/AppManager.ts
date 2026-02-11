@@ -26,6 +26,7 @@ export class AppManager {
     /** Tracks if dragging just occured (prevents mouseup events) */
     wasDragging: boolean = false;
 
+    selectedTrack: HTMLElement | undefined = undefined;
     selectedStation: HTMLElement | undefined = undefined;
     draggedStation: HTMLElement |undefined = undefined;
     grabbedStation: HTMLElement | undefined = undefined;
@@ -83,13 +84,13 @@ export class AppManager {
         const label: HTMLElement = document.createElement("div");
 
         station.classList.add(CSS_VARS.STATION_CLASSNAME);
+        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME)
         station.style.position = "absolute";
         station.style.left = `${coord.x}px`;
         station.style.top = `${coord.y}px`;
         label.textContent = name;
-        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME)
 
-        station.appendChild(label)
+        station.appendChild(label);
         this.canvas.appendChild(station);
 
         console.log("Created station", station, label)
@@ -107,13 +108,11 @@ export class AppManager {
         return pos;
     }
 
+    /** Create new station when clicking empty space on canvas. Create with connection to currently selected station by ctrl+clicking. */
     handleContainerClick(e: PointerEvent): void {
         console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
         const stationPos = this.stationPosFromMouse({x: e.pageX, y: e.pageY});
 
-        /** Create new station when clicking empty space on canvas.
-         * Create new station + connection to currently selected station by ctrl+clicking.
-         */
         const station = this.createStation(stationPos);
 
         if (e.ctrlKey && this.selectedStation) {
@@ -141,16 +140,19 @@ export class AppManager {
 
     handleInteractiveClick(e: PointerEvent): void {
         const target: HTMLElement = e.target as HTMLElement
-        if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-            console.log("Clicked station", target);
 
-            if (e.detail == 1 && e.ctrlKey && this.selectedStation) {
-                console.log("Ctrl click")
-                this.createTrack({}, target, this.selectedStation);
-            } else {
-                console.log("Nah");
+        if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+            if (e.detail == 2) {
+                e.stopPropagation();
+                const newName = prompt("New name for station:");
+                if (newName) this.renameStation(target, newName);
+                return;
             }
 
+            if (e.detail == 1 && e.ctrlKey && this.selectedStation) {
+                this.createTrack({}, target, this.selectedStation);
+            }
+            
             this.unselectStation();
             this.selectStation(target);
         }
@@ -168,7 +170,6 @@ export class AppManager {
             /** Prevents creating new dot after just letting go of dragged dot */
             if (this.wasDragging == true) {
                 this.wasDragging = false;
-                return;
             }
         
             if (this.isInteractiveElement(e)) {
@@ -187,12 +188,35 @@ export class AppManager {
     selectStation(st: HTMLElement) {
         this.selectedStation = st;
         this.selectedStation.classList.add("selected");
+        console.log("Selected station", st);
     }
 
     unselectStation() {
         if (this.selectedStation) {
             this.selectedStation.classList.remove("selected");
             this.selectedStation = undefined;
+        }
+    }
+
+    renameStation(st: HTMLElement, newName:string) {
+        const label = st.firstChild as HTMLElement;
+        const currName = label?.textContent;
+        if (newName === currName) {
+            return;
+        }
+        label.textContent = newName;
+        console.log(`Renamed station from ${currName} to ${newName}`, st);
+    }
+
+    selectTrack(tr: HTMLElement) {
+        this.selectedTrack = tr;
+        this.selectedTrack.classList.add("selected");
+    }
+
+    unselectTrack(tr: HTMLElement) {
+        if (this.selectedTrack) {
+            this.selectedTrack.classList.remove("selected");
+            this.selectedTrack = undefined;
         }
     }
 

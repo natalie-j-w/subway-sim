@@ -15,7 +15,7 @@ export const CSS_VARS = {
     STATION_SIZE: '--station-size',
     STATION_COLOR: '--station-color',
     STATION_BORDER_COLOR: '--station-border-color',
-    TRACK_COLOR: '--line-color'
+    TRACK_COLOR: '--track-color'
 }
 
 export const JS_VARS = {

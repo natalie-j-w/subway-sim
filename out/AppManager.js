@@ -9,6 +9,7 @@ export class AppManager {
     showStationLabels = true;
     /** Tracks if dragging just occured (prevents mouseup events) */
     wasDragging = false;
+    selectedTrack = undefined;
     selectedStation = undefined;
     draggedStation = undefined;
     grabbedStation = undefined;
@@ -53,11 +54,11 @@ export class AppManager {
         const station = document.createElement("div");
         const label = document.createElement("div");
         station.classList.add(CSS_VARS.STATION_CLASSNAME);
+        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME);
         station.style.position = "absolute";
         station.style.left = `${coord.x}px`;
         station.style.top = `${coord.y}px`;
         label.textContent = name;
-        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME);
         station.appendChild(label);
         this.canvas.appendChild(station);
         console.log("Created station", station, label);
@@ -71,10 +72,10 @@ export class AppManager {
         }
         return pos;
     }
+    /** Create new station when clicking empty space on canvas. Create with connection to currently selected station by ctrl+clicking. */
     handleContainerClick(e) {
         console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
         const stationPos = this.stationPosFromMouse({ x: e.pageX, y: e.pageY });
-        /** Create new station when clicking empty space on canvas */
         const station = this.createStation(stationPos);
         if (e.ctrlKey && this.selectedStation) {
             this.createTrack({}, station, this.selectedStation);
@@ -99,13 +100,15 @@ export class AppManager {
     handleInteractiveClick(e) {
         const target = e.target;
         if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-            console.log("Clicked station", target);
-            if (e.detail == 1 && e.ctrlKey && this.selectedStation) {
-                console.log("Ctrl click");
-                this.createTrack({}, target, this.selectedStation);
+            if (e.detail == 2) {
+                e.stopPropagation();
+                const newName = prompt("New name for station:");
+                if (newName)
+                    this.renameStation(target, newName);
+                return;
             }
-            else {
-                console.log("Nah");
+            if (e.detail == 1 && e.ctrlKey && this.selectedStation) {
+                this.createTrack({}, target, this.selectedStation);
             }
             this.unselectStation();
             this.selectStation(target);
@@ -123,7 +126,6 @@ export class AppManager {
             /** Prevents creating new dot after just letting go of dragged dot */
             if (this.wasDragging == true) {
                 this.wasDragging = false;
-                return;
             }
             if (this.isInteractiveElement(e)) {
                 this.handleInteractiveClick(e);
@@ -138,11 +140,31 @@ export class AppManager {
     selectStation(st) {
         this.selectedStation = st;
         this.selectedStation.classList.add("selected");
+        console.log("Selected station", st);
     }
     unselectStation() {
         if (this.selectedStation) {
             this.selectedStation.classList.remove("selected");
             this.selectedStation = undefined;
+        }
+    }
+    renameStation(st, newName) {
+        const label = st.firstChild;
+        const currName = label?.textContent;
+        if (newName === currName) {
+            return;
+        }
+        label.textContent = newName;
+        console.log(`Renamed station from ${currName} to ${newName}`, st);
+    }
+    selectTrack(tr) {
+        this.selectedTrack = tr;
+        this.selectedTrack.classList.add("selected");
+    }
+    unselectTrack(tr) {
+        if (this.selectedTrack) {
+            this.selectedTrack.classList.remove("selected");
+            this.selectedTrack = undefined;
         }
     }
     /**
