@@ -29,25 +29,33 @@ export class AppManager {
         this.canvas = canvas;
         this.svg.setAttribute('viewBox', `0 0 ${this.canvas.clientWidth} ${this.canvas.clientHeight}`);
         this.setupEventListeners();
-        this.createTrack({ x1: 20, y1: 20, x2: 60, y2: 60 });
+        this.createTrack({ x1: 20, y1: 20, x2: 200, y2: 200 });
         this.createStation({ x: 30, y: 30 });
     }
     createTrack(coord, station1, station2) {
+        const group = document.createElementNS(SVG_NAMESPACE, "g");
         const track = document.createElementNS(SVG_NAMESPACE, "line");
+        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
+        const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
+        selectionLine.classList.add(CSS_VARS.SELECTION_LINE);
         let actualCoords = coord;
         if (station1 && station2) {
-            actualCoords = { x1: parseFloat(station1.style.left) + VAR_DOT_SIZE / 2, y1: parseFloat(station1.style.top) + VAR_DOT_SIZE / 2,
-                x2: parseFloat(station2.style.left) + VAR_DOT_SIZE / 2, y2: parseFloat(station2.style.top) + VAR_DOT_SIZE / 2 };
+            actualCoords = {
+                x1: parseFloat(station1.style.left) + VAR_DOT_SIZE / 2,
+                y1: parseFloat(station1.style.top) + VAR_DOT_SIZE / 2,
+                x2: parseFloat(station2.style.left) + VAR_DOT_SIZE / 2,
+                y2: parseFloat(station2.style.top) + VAR_DOT_SIZE / 2
+            };
         }
-        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
-        track.setAttribute("x1", String(actualCoords.x1));
-        track.setAttribute("y1", String(actualCoords.y1));
-        track.setAttribute("x2", String(actualCoords.x2));
-        track.setAttribute("y2", String(actualCoords.y2));
-        track.setAttribute("stroke", "green");
-        track.setAttribute("stroke-width", "2");
-        this.svg.appendChild(track);
-        console.log("Created track", track);
+        [track, selectionLine].forEach(line => {
+            line.setAttribute("x1", String(actualCoords.x1));
+            line.setAttribute("y1", String(actualCoords.y1));
+            line.setAttribute("x2", String(actualCoords.x2));
+            line.setAttribute("y2", String(actualCoords.y2));
+        });
+        group.appendChild(selectionLine);
+        group.appendChild(track);
+        this.svg.appendChild(group);
         return track;
     }
     createStation(coord, name = "Unnamed") {
@@ -81,6 +89,7 @@ export class AppManager {
             this.createTrack({}, station, this.selectedStation);
         }
         this.unselectStation();
+        this.unselectTrack();
         this.selectStation(station);
     }
     /**
@@ -89,9 +98,10 @@ export class AppManager {
      * @returns True if element is either a station dot or track line, false otherwise.
      */
     isInteractiveElement(e) {
-        if (e.target instanceof HTMLElement) {
+        if (e.target instanceof HTMLElement || e.target instanceof SVGElement) {
             return e.target.classList.contains(CSS_VARS.STATION_CLASSNAME) ||
-                e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME);
+                e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME) ||
+                e.target.classList.contains(CSS_VARS.SELECTION_LINE);
         }
         else {
             return false;
@@ -111,10 +121,16 @@ export class AppManager {
                 this.createTrack({}, target, this.selectedStation);
             }
             this.unselectStation();
+            this.unselectTrack();
             this.selectStation(target);
         }
         else if (target.classList.contains(CSS_VARS.TRACK_CLASSNAME)) {
-            console.log("Clicked track", target);
+            e.stopPropagation();
+            console.log("Clicked track", target, target.nextSibling);
+        }
+        else if (target.classList.contains(CSS_VARS.SELECTION_LINE)) {
+            this.selectTrack(target.nextSibling);
+            console.log("Clicked selection line", target);
         }
         else {
             console.log("Clicked some other interactable target", target);
@@ -138,9 +154,11 @@ export class AppManager {
         });
     }
     selectStation(st) {
+        this.unselectTrack();
+        this.unselectStation();
         this.selectedStation = st;
         this.selectedStation.classList.add("selected");
-        console.log("Selected station", st);
+        console.log("Selected station", this.selectedStation);
     }
     unselectStation() {
         if (this.selectedStation) {
@@ -158,10 +176,14 @@ export class AppManager {
         console.log(`Renamed station from ${currName} to ${newName}`, st);
     }
     selectTrack(tr) {
+        console.log("Selecting", tr);
+        this.unselectStation();
+        this.unselectTrack();
         this.selectedTrack = tr;
         this.selectedTrack.classList.add("selected");
+        console.log("Selected track", this.selectedTrack);
     }
-    unselectTrack(tr) {
+    unselectTrack() {
         if (this.selectedTrack) {
             this.selectedTrack.classList.remove("selected");
             this.selectedTrack = undefined;

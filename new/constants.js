@@ -8,8 +8,9 @@ export const CSS_VARS = {
     STATION_LABEL_CLASSNAME: 'station-dot__label',
 
     // Class names for TrackView (TrackView.css TBD)
-    TRACK_CLASSNAME: 'connection-line',
-    TRACK_LABEL_CLASSNAME: 'connection-line__label',
+    TRACK_CLASSNAME: 'track-line',
+    TRACK_LABEL_CLASSNAME: 'track-line__label',
+    SELECTION_LINE: 'selection-line',
 
     // Global constants from main.css
     STATION_SIZE: '--station-size',

@@ -52,32 +52,42 @@ export class AppManager {
 
         this.setupEventListeners();
 
-        this.createTrack({x1: 20, y1: 20, x2: 60, y2: 60});
+        this.createTrack({x1: 20, y1: 20, x2: 200, y2: 200});
         this.createStation({x: 30, y: 30});
     }
 
-    createTrack(coord: Coordinate, station1?: HTMLElement, station2?: HTMLElement): SVGLineElement {
-        const track: SVGLineElement = document.createElementNS(SVG_NAMESPACE, "line");
-        let actualCoords: Coordinate = coord;
+createTrack(coord: Coordinate, station1?: HTMLElement, station2?: HTMLElement) {
+    const group = document.createElementNS(SVG_NAMESPACE, "g");
 
-        if (station1 && station2) {
-            actualCoords = {x1: parseFloat(station1.style.left) + VAR_DOT_SIZE/2, y1: parseFloat(station1.style.top) + VAR_DOT_SIZE/2,
-                x2: parseFloat(station2.style.left) + VAR_DOT_SIZE/2, y2: parseFloat(station2.style.top) + VAR_DOT_SIZE/2};
-        }
+    const track = document.createElementNS(SVG_NAMESPACE, "line");
+    track.classList.add(CSS_VARS.TRACK_CLASSNAME);
+    
+    const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
+    selectionLine.classList.add(CSS_VARS.SELECTION_LINE);
 
-        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
-        track.setAttribute("x1", String(actualCoords.x1));
-        track.setAttribute("y1", String(actualCoords.y1));
-        track.setAttribute("x2", String(actualCoords.x2));
-        track.setAttribute("y2", String(actualCoords.y2));
-        track.setAttribute("stroke", "green");
-        track.setAttribute("stroke-width", "2");
-
-        this.svg.appendChild(track);
-
-        console.log("Created track", track)
-        return track;
+    let actualCoords = coord;
+    if (station1 && station2) {
+        actualCoords = { 
+            x1: parseFloat(station1.style.left) + VAR_DOT_SIZE / 2, 
+            y1: parseFloat(station1.style.top) + VAR_DOT_SIZE / 2,
+            x2: parseFloat(station2.style.left) + VAR_DOT_SIZE / 2, 
+            y2: parseFloat(station2.style.top) + VAR_DOT_SIZE / 2 
+        };
     }
+
+    [track, selectionLine].forEach(line => {
+        line.setAttribute("x1", String(actualCoords.x1));
+        line.setAttribute("y1", String(actualCoords.y1));
+        line.setAttribute("x2", String(actualCoords.x2));
+        line.setAttribute("y2", String(actualCoords.y2));
+    });
+
+    group.appendChild(selectionLine); 
+    group.appendChild(track); 
+    
+    this.svg.appendChild(group);
+    return track; 
+}
 
     createStation(coord: Coordinate, name: string = "Unnamed"): HTMLElement {
         const station: HTMLElement = document.createElement("div");
@@ -112,7 +122,6 @@ export class AppManager {
     handleContainerClick(e: PointerEvent): void {
         console.log(`Clicked container at X: ${e.pageX} Y: ${e.pageY}`);
         const stationPos = this.stationPosFromMouse({x: e.pageX, y: e.pageY});
-
         const station = this.createStation(stationPos);
 
         if (e.ctrlKey && this.selectedStation) {
@@ -120,6 +129,7 @@ export class AppManager {
         }
 
         this.unselectStation();
+        this.unselectTrack();
         this.selectStation(station)
     }
 
@@ -129,9 +139,10 @@ export class AppManager {
      * @returns True if element is either a station dot or track line, false otherwise.
      */
     isInteractiveElement(e: PointerEvent): boolean {
-        if (e.target instanceof HTMLElement) {
+        if (e.target instanceof HTMLElement || e.target instanceof SVGElement) {
             return e.target.classList.contains(CSS_VARS.STATION_CLASSNAME) ||
-                e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME) 
+                e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME) ||
+                e.target.classList.contains(CSS_VARS.SELECTION_LINE) 
         }
         else {
             return false;
@@ -154,11 +165,20 @@ export class AppManager {
             }
             
             this.unselectStation();
+            this.unselectTrack();
             this.selectStation(target);
         }
+
         else if (target.classList.contains(CSS_VARS.TRACK_CLASSNAME)) {
-            console.log("Clicked track", target);
+            e.stopPropagation();
+            console.log("Clicked track", target, target.nextSibling);
         }
+
+        else if (target.classList.contains(CSS_VARS.SELECTION_LINE)) {
+            this.selectTrack(target.nextSibling as HTMLElement)
+            console.log("Clicked selection line", target)
+        }
+
         else {
             console.log("Clicked some other interactable target", target);
         }
@@ -186,9 +206,11 @@ export class AppManager {
     }
 
     selectStation(st: HTMLElement) {
+        this.unselectTrack();
+        this.unselectStation();
         this.selectedStation = st;
         this.selectedStation.classList.add("selected");
-        console.log("Selected station", st);
+        console.log("Selected station", this.selectedStation);
     }
 
     unselectStation() {
@@ -209,11 +231,14 @@ export class AppManager {
     }
 
     selectTrack(tr: HTMLElement) {
+        this.unselectStation();
+        this.unselectTrack();
         this.selectedTrack = tr;
         this.selectedTrack.classList.add("selected");
+        console.log("Selected track", this.selectedTrack)
     }
 
-    unselectTrack(tr: HTMLElement) {
+    unselectTrack() {
         if (this.selectedTrack) {
             this.selectedTrack.classList.remove("selected");
             this.selectedTrack = undefined;
