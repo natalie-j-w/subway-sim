@@ -10,7 +10,7 @@ export const CSS_VARS = {
     // Class names for TrackView (TrackView.css TBD)
     TRACK_CLASSNAME: 'track-line',
     TRACK_LABEL_CLASSNAME: 'track-line__label',
-    SELECTION_LINE: 'selection-line',
+    SELECTION_LINE_CLASSNAME: 'selection-line',
 
     // Global constants from main.css
     STATION_SIZE: '--station-size',
