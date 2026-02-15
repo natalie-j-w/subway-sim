@@ -1,14 +1,16 @@
 import { CSS_VARS } from "../new/constants.js"
-
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 
 interface Coordinate {
-    x?: number,
-    y?: number,
-    x1?: number,
-    y1?: number,
-    x2?: number,
-    y2?: number
+    x: number,
+    y: number
+}
+
+interface LineCoordinate {
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
 }
 
 const VAR_DOT_SIZE = parseFloat(
@@ -16,425 +18,249 @@ const VAR_DOT_SIZE = parseFloat(
         .getPropertyValue(CSS_VARS.STATION_SIZE)
 );
 
+interface TrackConnection {
+    track: SVGLineElement;
+    /** 'start' if station is at x1,y1; 'end' if at x2,y2 */
+    endpoint: 'start' | 'end';
+}
 
 export class AppManager {
     container: HTMLElement
-    svg: HTMLElement
+    svg: SVGElement
     canvas: HTMLElement
-    showStationLabels: boolean = true;
 
-    /** Tracks if dragging just occured (prevents mouseup events) */
-    wasDragging: boolean = false;
-
-    selectedTracks: Set<SVGLineElement> = new Set();
-    selectedStations: Set<HTMLElement> = new Set();
-    draggedStation: HTMLElement |undefined = undefined;
-    grabbedStation: HTMLElement | undefined = undefined;
-
-    /** Tracks if a dragging operation has been started */
-    dragStarted: boolean = false;
-
-    /** Mouse position of last mousedown over a station. Used to calculate distance to current mouse pos to initiate dragging. */
-    lastMouseDownPos: Coordinate = {};
-
-    /** <StationElement, [TrackElements]> */
-    stationsTracks = new WeakMap<HTMLElement, Set<SVGLineElement>>;
+    selectedTracks = new Set<SVGLineElement>();
+    selectedStations = new Set<HTMLElement>();
     
-    containerBounds: DOMRect;
+    dragState: {
+        station?: HTMLElement;
+        startPos?: Coordinate;
+        isDragging: boolean;
+    } = { isDragging: false };
 
+    /** Map: Station → Array of {track, endpoint} */
+    stationConnections = new WeakMap<HTMLElement, TrackConnection[]>();
 
-    /**
-     * Creates an instance of AppManager.
-     * @param container - Container element
-     * @param svg - SVG element where Tracks are placed.
-     * @param canvas - Div element where Stations are placed. Positioned below svg.
-     */
-    constructor(container: HTMLElement, svg: HTMLElement, canvas: HTMLElement) {
+    constructor(container: HTMLElement, svg: SVGElement, canvas: HTMLElement) {
         this.container = container;
         this.svg = svg;
         this.canvas = canvas;
-        this.containerBounds = this.container.getBoundingClientRect();
-        this.container.style.left = "100px";
-        this.container.style.top = "50px";
-        this.svg.setAttribute('viewBox', `0 0 ${this.canvas.clientWidth} ${this.canvas.clientHeight}`)
-
+        
+        this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
         this.setupEventListeners();
 
         const s1 = this.createStation({x: 30, y: 30});
-        const s2 = this.createStation({x:400, y: 300});
-        this.createTrack({}, s1, s2);
+        const s2 = this.createStation({x: 400, y: 300});
+        this.createTrack(s1, s2);
     }
 
-    createTrack(coord: Coordinate, station1?: HTMLElement, station2?: HTMLElement) {
-        const group = document.createElementNS(SVG_NAMESPACE, "g");
+    /** Get mouse coordinates relative to container */
+    private getRelativeCoords(e: MouseEvent): Coordinate {
+        const bounds = this.container.getBoundingClientRect();
+        return {
+            x: e.clientX - bounds.left,
+            y: e.clientY - bounds.top
+        };
+    }
 
-        const newTrack = document.createElementNS(SVG_NAMESPACE, "line") as SVGLineElement;
-        newTrack.classList.add(CSS_VARS.TRACK_CLASSNAME);
-        
-        const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
-        selectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
-
-        let actualCoords = coord;
-        if (station1 && station2) {
-            actualCoords = { 
-                x1: parseFloat(station1.style.left) + VAR_DOT_SIZE / 2, 
-                y1: parseFloat(station1.style.top) + VAR_DOT_SIZE / 2,
-                x2: parseFloat(station2.style.left) + VAR_DOT_SIZE / 2, 
-                y2: parseFloat(station2.style.top) + VAR_DOT_SIZE / 2};
-
-            [station1, station2].forEach(st => {
-                const tracks = this.stationsTracks.get(st);
-                tracks.add(newTrack);
-            })
-        }
-
-        [newTrack, selectionLine].forEach(line => {
-            this.moveTrack(line, actualCoords);
-        });
-
-        group.appendChild(selectionLine); 
-        group.appendChild(newTrack); 
-        
-        this.svg.appendChild(group);
-        console.log("List of stations, tracks:", this.stationsTracks)
-        return newTrack; 
+    /** Get station center coordinates */
+    private getStationCenter(station: HTMLElement): Coordinate {
+        return {
+            x: parseFloat(station.style.left) + VAR_DOT_SIZE / 2,
+            y: parseFloat(station.style.top) + VAR_DOT_SIZE / 2
+        };
     }
 
     createStation(coord: Coordinate, name: string = "Unnamed"): HTMLElement {
-        const newStation: HTMLElement = document.createElement("div");
-        const label: HTMLElement = document.createElement("div");
+        const station = document.createElement("div");
+        const label = document.createElement("div");
 
-        newStation.classList.add(CSS_VARS.STATION_CLASSNAME);
-        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME)
-        newStation.style.position = "absolute";
+        station.classList.add(CSS_VARS.STATION_CLASSNAME);
+        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME);
         label.textContent = name;
-        this.moveStation(newStation, coord);
 
-        newStation.appendChild(label);
-        this.canvas.appendChild(newStation);
+        station.style.position = "absolute";
+        station.style.left = `${coord.x - VAR_DOT_SIZE / 2}px`;
+        station.style.top = `${coord.y - VAR_DOT_SIZE / 2}px`;
 
-        this.stationsTracks.set(newStation, new Set());
+        station.appendChild(label);
+        this.canvas.appendChild(station);
 
-        console.log("Created station", newStation, label);
-
-        return newStation;
-    }
-
-    realCoordsFromMouse(e?: PointerEvent | MouseEvent, coords?: Coordinate): Coordinate {
-        let newCoords: Coordinate = {};
-        const bounds = this.container.getBoundingClientRect();
-
-        if (coords) {
-            newCoords.x -= bounds.left;
-            newCoords.y -= bounds.top;
-        }
-        else if (e) {
-            newCoords.x = e.clientX - bounds.left;
-            newCoords.y = e.clientY - bounds.top;
-        }
-        else {
-            return;
-        }
-
+        this.stationConnections.set(station, []);
         
-
-        return newCoords;
+        return station;
     }
 
-    /** Create new station when clicking empty space on canvas. Create with connection to currently selected station by ctrl+clicking. */
-    handleContainerClick(e: PointerEvent): void {
-        let newStation;
-        const clickCoords = this.realCoordsFromMouse(e);
-        console.log(`Clicked container at X: ${clickCoords.x} Y: ${clickCoords.y}`);
-        newStation = this.createStation(clickCoords);
-    
+    createTrack(station1: HTMLElement, station2: HTMLElement): SVGLineElement {
+        const group = document.createElementNS(SVG_NAMESPACE, "g");
+        
+        // Selection line (invisible + thicker, for easier clicking)
+        const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
+        selectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
+        
+        // Actual track line
+        const track = document.createElementNS(SVG_NAMESPACE, "line");
+        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
 
-        if (e.ctrlKey && this.selectedStations.size == 1) {
-            this.createTrack({}, newStation, this.selectedStations[0]);
-        }
+        const s1Center = this.getStationCenter(station1);
+        const s2Center = this.getStationCenter(station2);
+        const coords: LineCoordinate = { x1:s1Center.x, y1: s1Center.y, x2: s2Center.x, y2: s2Center.y };
 
-        this.unselectStation();
-        this.unselectTrack();
-        this.selectStation(newStation)
+        [selectionLine, track].forEach(line => {
+            line.setAttribute("x1", String(coords.x1));
+            line.setAttribute("y1", String(coords.y1));
+            line.setAttribute("x2", String(coords.x2));
+            line.setAttribute("y2", String(coords.y2));
+        });
+
+        group.appendChild(selectionLine);
+        group.appendChild(track);
+        this.svg.appendChild(group);
+
+        this.stationConnections.get(station1)!.push({ track, endpoint: 'start' });
+        this.stationConnections.get(station2)!.push({ track, endpoint: 'end' });
+
+        return track;
     }
 
-    /**
-     * Determines whether an element is interactive (a station dot or track line).
-     * @param  e - Pointer event with a target element.
-     * @returns True if element is either a station dot or track line, false otherwise.
-     */
-    isInteractiveElement(e: PointerEvent): boolean {
-        if (e.target instanceof HTMLElement || e.target instanceof SVGElement) {
-            return e.target.classList.contains(CSS_VARS.STATION_CLASSNAME) ||
-                e.target.classList.contains(CSS_VARS.TRACK_CLASSNAME) ||
-                e.target.classList.contains(CSS_VARS.SELECTION_LINE) 
-        }
-        else {
-            return false;
-        }
-    }
+    private updateStationPosition(station: HTMLElement, coord: Coordinate): void {
+        station.style.left = `${coord.x - VAR_DOT_SIZE / 2}px`;
+        station.style.top = `${coord.y - VAR_DOT_SIZE / 2}px`;
 
-    handleInteractiveClick(e: PointerEvent): void {
-        const target: HTMLElement = e.target as HTMLElement
+        // Update connected tracks
+        const connections = this.stationConnections.get(station);
+        if (!connections) return;
 
-        if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-            if (e.detail == 2) {
-                e.stopPropagation();
-                const newName = prompt("New name for station:");
-                if (newName) this.renameStation(target, newName);
-                return;
-            }
-
-            if (e.detail == 1 && e.ctrlKey && this.selectedStations.size == 1) {
-                this.createTrack({}, target, this.selectedStations[0]);
-            }
+        connections.forEach(({ track, endpoint }) => {
+            const selectionLine = track.previousElementSibling as SVGLineElement;
             
-            this.unselectStation();
-            this.unselectTrack();
-            this.selectStation(target);
-        }
-
-        else if (target.classList.contains(CSS_VARS.TRACK_CLASSNAME)) {
-            e.stopPropagation();
-            console.log("Clicked track", target, target.nextSibling);
-        }
-
-        else if (target.classList.contains(CSS_VARS.SELECTION_LINE)) {
-            this.selectTrack(target.nextSibling as SVGLineElement)
-            console.log("Clicked selection line", target)
-        }
-
-        else {
-            console.log("Clicked some other interactable target", target);
-        }
-    }
-
-    trackGetSelectionLine(tr: SVGLineElement) {
-        return tr.nextSibling;
+            if (endpoint === 'start') {
+                track.setAttribute("x1", String(coord.x));
+                track.setAttribute("y1", String(coord.y));
+                selectionLine?.setAttribute("x1", String(coord.x));
+                selectionLine?.setAttribute("y1", String(coord.y));
+            } else {
+                track.setAttribute("x2", String(coord.x));
+                track.setAttribute("y2", String(coord.y));
+                selectionLine?.setAttribute("x2", String(coord.x));
+                selectionLine?.setAttribute("y2", String(coord.y));
+            }
+        });
     }
 
     setupEventListeners(): void {
-        /** Create new station when clicking container */
         this.container.addEventListener('click', e => {
-            /** Prevents creating new dot after just letting go of dragged dot */
-            if (this.wasDragging == true) {
-                this.wasDragging = false;
-            }
-            else {
-                if (this.isInteractiveElement(e)) {
-                    this.handleInteractiveClick(e);
-                }
-                else {
-                    this.handleContainerClick(e);
-                }
+            if (this.dragState.isDragging) {
+                this.dragState.isDragging = false;
+                return;
             }
 
+            const target = e.target as Element;
+
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                this.handleStationClick(target as HTMLElement, e);
+            } else if (target.classList.contains(CSS_VARS.SELECTION_LINE_CLASSNAME)) {
+                this.handleTrackClick(target.nextElementSibling as SVGLineElement, e);
+            } else if (target.classList.contains(CSS_VARS.TRACK_CLASSNAME)) {
+                this.handleTrackClick(target as SVGLineElement, e);
+            } else {
+                this.handleCanvasClick(e);
+            }
+        });
+
+        this.container.addEventListener('dblclick', e => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                const newName = prompt("New name for station:");
+                if (newName) {
+                    const label = target.firstChild as HTMLElement;
+                    label.textContent = newName;
+                }
+            }
         });
 
         this.container.addEventListener('mousedown', e => {
-            const target: HTMLElement = e.target as HTMLElement;
+            const target = e.target as HTMLElement;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME) && !e.ctrlKey) {
-                this.lastMouseDownPos = this.realCoordsFromMouse(e);
-                this.grabStation(target);
+                this.clearSelection();
+                this.selectStation(target);
+                this.dragState = {
+                    station: target,
+                    startPos: this.getRelativeCoords(e),
+                    isDragging: false
+                };
             }
         });
 
         this.container.addEventListener('mousemove', e => {
-            let currMousePos = this.realCoordsFromMouse(e);
-            const dist = Math.sqrt((currMousePos.x - this.lastMouseDownPos.x)**2 + (currMousePos.y - this.lastMouseDownPos.y)**2);
+            if (!this.dragState.station || !this.dragState.startPos) return;
 
-            if (dist > 3 && this.grabbedStation) {
-                this.startDraggingGrabbedStation();
-                this.moveStation(this.draggedStation, this.realCoordsFromMouse(e));
+            const currentPos = this.getRelativeCoords(e);
+            const dx = currentPos.x - this.dragState.startPos.x;
+            const dy = currentPos.y - this.dragState.startPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 3) {
+                if (!this.dragState.isDragging) {
+                    this.dragState.isDragging = true;
+                    this.dragState.station.classList.add("dragging");
+                }
+                this.updateStationPosition(this.dragState.station, currentPos);
             }
         });
 
-        this.container.addEventListener('mouseup', e => {
-            this.dropCurrentDraggedStation();
-        })
-    }
-
-    selectStation(st: HTMLElement) {
-        if (!this.selectedStations.has(st)) {
-            this.unselectTrack();
-            this.unselectStation();
-            st.classList.add("selected");
-            this.selectedStations.add(st);
-            console.log("Selected station", st);
-        }
-    }
-
-    /**
-     * Unselects specified station, or all selected stations if no station is specified.
-     * @param st 
-     */
-    unselectStation(st?: HTMLElement) {
-        if (!st) {
-            this.selectedStations.forEach(station => {station.classList.remove("selected")});
-            this.selectedStations.clear();            
-        }
-        else if (this.selectedStations.has(st)) {
-            st.classList.remove("selected");
-            this.selectedStations.delete(st);
-        } 
-        else {
-            return;
-        }
-    }
-
-    renameStation(st: HTMLElement, newName:string) {
-        const label = st.firstChild as HTMLElement;
-        const currName = label?.textContent;
-        if (newName === currName) {
-            return;
-        }
-        label.textContent = newName;
-        console.log(`Renamed station from ${currName} to ${newName}`, st);
-    }
-
-    /**
-     * Selects specified track.
-     * @param tr 
-     */
-    selectTrack(tr: SVGLineElement) {
-        if (!this.selectedTracks.has(tr)) {
-            this.unselectStation();
-            this.unselectTrack(tr);
-            tr.classList.add("selected")
-            this.selectedTracks.add(tr);
-            console.log("Selected track", tr)            
-        }
-        console.log(this.selectedTracks)
-    }
-
-    /**
-     * Unselects specified track, or all selected tracks of no track is specified.
-     * @param tr (optional) - Track to be deleted.
-     */
-    unselectTrack(tr?: SVGLineElement) {
-        if (!tr) {
-            this.selectedTracks.forEach(track => {track.classList.remove("selected")});
-            this.selectedTracks.clear();
-        }
-        else if (this.selectedTracks.has(tr)) {
-            tr.classList.remove("selected");
-            this.selectedTracks.delete(tr);
-        }
-        else {
-            return;
-        }
-    }
-
-moveStation(st: HTMLElement, coords: Coordinate) {
-    const connectedTracks = this.stationsTracks.get(st);
-    
-    // Get current station center position (before moving)
-    const oldCenterX = parseFloat(st.style.left) + VAR_DOT_SIZE / 2;
-    const oldCenterY = parseFloat(st.style.top) + VAR_DOT_SIZE / 2;
-    
-    // Calculate new center position
-    const newCenterX = coords.x;
-    const newCenterY = coords.y;
-    
-    // Move the station
-    st.style.left = `${coords.x - VAR_DOT_SIZE / 2}px`;
-    st.style.top = `${coords.y - VAR_DOT_SIZE / 2}px`;
-    
-    // Update connected tracks
-    if (connectedTracks) {
-        connectedTracks.forEach(tr => {
-            const x1 = parseFloat(tr.getAttribute("x1"));
-            const y1 = parseFloat(tr.getAttribute("y1"));
-            const x2 = parseFloat(tr.getAttribute("x2"));
-            const y2 = parseFloat(tr.getAttribute("y2"));
-            
-            // Check which end matches the old station position
-            const tolerance = 1; // Account for floating point precision
-            
-            if (Math.abs(x1 - oldCenterX) < tolerance && 
-                Math.abs(y1 - oldCenterY) < tolerance) {
-                // Update start point (x1, y1)
-                this.moveTrack(tr, { x1: newCenterX, y1: newCenterY, x2, y2 });
-            }
-            else if (Math.abs(x2 - oldCenterX) < tolerance && 
-                     Math.abs(y2 - oldCenterY) < tolerance) {
-                // Update end point (x2, y2)
-                this.moveTrack(tr, { x1, y1, x2: newCenterX, y2: newCenterY });
+        this.container.addEventListener('mouseup', () => {
+            if (this.dragState.station) {
+                this.dragState.station.classList.remove("dragging");
+                this.dragState = { isDragging: false };
             }
         });
     }
-}
 
-    /**
-     * Moves specified track and its selection line to specified coordinates.
-     */
-    moveTrack(tr: SVGLineElement, coords: Coordinate) {
-        const selectionLine = this.trackGetSelectionLine(tr) as SVGLineElement;
-        console.log(tr.nextSibling)
-        if (selectionLine && selectionLine.classList.contains(CSS_VARS.SELECTION_LINE_CLASSNAME)) {
-            selectionLine.setAttribute("x1", `${coords.x1}`);
-            selectionLine.setAttribute("y1", `${coords.y1}`);
-            selectionLine.setAttribute("x2", `${coords.x2}`);
-            selectionLine.setAttribute("y2", `${coords.y2}`);
+    private handleStationClick(station: HTMLElement, e: MouseEvent): void {
+        console.log("Handle station click")
+        if (e.ctrlKey && this.selectedStations.size === 1) {
+            const [selected] = this.selectedStations;
+            this.createTrack(selected, station);
         }
-
-        tr.setAttribute("x1", `${coords.x1}`);
-        tr.setAttribute("y1", `${coords.y1}`);
-        tr.setAttribute("x2", `${coords.x2}`);
-        tr.setAttribute("y2", `${coords.y2}`);
+        
+        this.clearSelection();
+        this.selectStation(station);
     }
 
-    /**
-     * Grabs station for dragging (if not already grabbed).
-     * @param st 
-     */
-    grabStation(st: HTMLElement) {
-        if (st !== this.grabbedStation) {
-            this.grabbedStation = st;
-            this.dragStarted = false;
-            this.selectStation(this.grabbedStation);
-            console.log("Grabbed station", this.grabbedStation)            
-        }
-
+    private handleTrackClick(track: SVGLineElement, e: MouseEvent): void {
+        e.stopPropagation();
+        this.clearSelection();
+        this.selectTrack(track);
     }
 
-    /**
-     * Initiates drag of currently grabbed station
-     */
-    startDraggingGrabbedStation() {
-        if (!this.dragStarted && this.grabbedStation) {
-            this.draggedStation = this.grabbedStation;
-            this.draggedStation.classList.add("dragging");
-            this.dragStarted = true;
-            this.wasDragging = true;
-            console.log("Started dragging station", this.draggedStation)
+    private handleCanvasClick(e: MouseEvent): void {
+        const coord = this.getRelativeCoords(e);
+        const newStation = this.createStation(coord);
+        
+        if (e.ctrlKey && this.selectedStations.size === 1) {
+            const [selected] = this.selectedStations;
+            this.createTrack(selected, newStation);
         }
+        
+        this.clearSelection();
+        this.selectStation(newStation);
     }
 
-    /**
-     * Drops currently dragged station.
-     */
-    dropCurrentDraggedStation() {
-        console.log("Dropped station", this.draggedStation);
-        this.draggedStation?.classList.remove("dragging");
-        this.dragStarted = false;
-        this.draggedStation = undefined;
-        this.grabbedStation = undefined;
+    selectStation(station: HTMLElement): void {
+        station.classList.add("selected");
+        this.selectedStations.add(station);
+    }
+
+    selectTrack(track: SVGLineElement): void {
+        track.classList.add("selected");
+        this.selectedTracks.add(track);
+    }
+
+    clearSelection(): void {
+        this.selectedStations.forEach(s => s.classList.remove("selected"));
+        this.selectedStations.clear();
+        this.selectedTracks.forEach(t => t.classList.remove("selected"));
+        this.selectedTracks.clear();
     }
 }
-
-
-    /**
-     * Sets up event delegation for station dots within a parent container.
-     * Attaches a single listener to the target element that filters for dots (identified by CSS_VARS.DOT_CLASSNAME)
-     * @param {string} type - Event type (e.g., 'click', 'mousedown')
-     * @param {HTMLElement} target - Parent element to attach the delegated listener to
-     * @param {StationViewInstanceEventCallback} callback - Called with (event, stationView) when a dot is targeted
-     */
-    // addStationListener(type: string, target: HTMLElement, callback: (e: Event) => void) {
-    //     target.addEventListener(type, (e) => {
-    //         if (e.target instanceof HTMLElement && e.target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-    //             callback(e);
-    //         }
-    //     });
-    // }
