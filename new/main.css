@@ -9,12 +9,73 @@
     font-size:small
 }
 
+html {
+    overflow-y: hidden;
+}
+
+body {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 100vh;
+    column-gap: 10px;
+    margin: 0;
+}
+
+#sidebar {
+    background-color: yellow;
+    grid-column: 1;
+    padding: 10px;
+}
+
+#right {
+    background-color: red;
+    grid-column: 2;
+}
+
+#options {
+    background-color: aqua;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 20px;
+    row-gap: 20px;
+    align-content: start;
+    
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+    padding-right: 10px;
+}
+
+.option {
+    display: contents;
+}
+
+.option label {
+    grid-column: 1;
+    text-wrap: nowrap;
+    height: 20px;
+    align-self: center;
+}
+
+.option input {
+    grid-column: 2;
+    height: 20px;
+    max-width: 100px;
+    justify-self: left;
+}
+
+
+h3 {
+    margin: 0;
+}
+
+
+
 #container {
+    grid-column: 2;
     position: relative;
-    top: 0;
-    left: 0;
-    height: 400px;
-    width: 600px;
+    height: 100%;
+    width: 100%;
 }
 
 #canvas {
@@ -35,8 +96,3 @@
     left: 0;
     pointer-events: none;
 }
-
-#toggle-labels {
-    position: relative;
-}
-

@@ -10,15 +10,41 @@
     <script type="module" src="main.js" defer></script>
 </head>
 <body>
-    <div id="container">
-        <div id="canvas"></div>
-        <svg id="svg-layer"></svg>  
+    <div id="sidebar"> 
+            <form id="options">
+                <h3>Options</h3>
+                <div class="option">
+                    <label>Station color</label>
+                    <input type="color">
+                </div>
+                
+                <div class="option">
+                    <label>Track color</label>
+                    <input type="color">
+                </div>
+
+                <div class="option">
+                    <label>Canvas color</label>
+                    <input type="color">
+                </div>
+
+                <div class="option">
+                    <label>Station size</label>
+                    <input type="range">
+                </div>
+
+                <div class="option">
+                    <label>Show station labels</label>
+                    <input type="checkbox">
+                </div>
+
+            </form>
     </div>
 
-    <div>
-        <input type="checkbox" id="toggle-labels" checked>
-        <label for="toggle-labels"> Show station labels </label>
-    </div>
+        <div id="container">
+            <div id="canvas"></div>
+            <svg id="svg-layer"></svg>  
+        </div>
 
 </body>
 </html>
