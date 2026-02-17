@@ -1,12 +1,12 @@
 /* UPDATE CONSTANTS.JS WHEN CHANGING CLASS NAME */
 
 .station-dot {
-    width : var(--dot-size);
-    height : var(--dot-size);
-    background-color : var(--dot-color);
+    width : var(--station-size);
+    height : var(--station-size);
+    background-color : var(--station-color);
     border-style: solid;
     border-width: 3px;
-    border-color: var(--dot-border-color);
+    border-color: var(--station-border-color);
     border-radius : 50%;
     position : absolute;
     z-index : 1000;
@@ -22,6 +22,7 @@
     display:block;
     top: 25px;
     pointer-events:none;
+    user-select:none;
 }
 
 .station-dot:hover {
