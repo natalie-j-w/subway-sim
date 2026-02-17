@@ -1,4 +1,4 @@
-import { CanvasHandler} from "./out/CanvasHandler.js";
+import { CanvasHandler} from "/out/CanvasHandler.js";
 
 // DOM element references
 const container = document.getElementById('container');

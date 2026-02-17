@@ -1,4 +1,4 @@
-import {CSS_VARS} from "../js/constants.js";
+import {CSS_VARS} from "../constants.js";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 

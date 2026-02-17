@@ -1,4 +1,4 @@
-import { CSS_VARS } from "../js/constants.js";
+import { CSS_VARS } from "../constants.js";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const VAR_DOT_SIZE = parseFloat(getComputedStyle(document.documentElement)
     .getPropertyValue(CSS_VARS.STATION_SIZE));
