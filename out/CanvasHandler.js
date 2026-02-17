@@ -1,4 +1,4 @@
-import { CSS_VARS } from "../new/constants.js";
+import { CSS_VARS } from "../js/constants.js";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const VAR_DOT_SIZE = parseFloat(getComputedStyle(document.documentElement)
     .getPropertyValue(CSS_VARS.STATION_SIZE));
@@ -22,9 +22,8 @@ export class CanvasHandler {
         this.createTrack(s1, s2);
         const resizeObserver = new ResizeObserver(() => {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
-            console.log("Observed resize");
         });
-        resizeObserver.observe(canvas);
+        resizeObserver.observe(container);
     }
     /** Get mouse coordinates relative to container */
     getRelativeCoords(e) {
