@@ -1,5 +1,6 @@
-import { CSS_VARS } from "../new/constants.js"
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg"
+import {CSS_VARS} from "../js/constants.js";
+
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 interface Coordinate {
     x: number,
@@ -55,7 +56,6 @@ export class CanvasHandler {
 
         const resizeObserver = new ResizeObserver(() => {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
-            console.log("Observed resize");
         });
 
         resizeObserver.observe(container);
