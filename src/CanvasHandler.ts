@@ -225,7 +225,6 @@ export class CanvasHandler {
     }
 
     private handleStationClick(station: HTMLElement, e: MouseEvent): void {
-        console.log("Handle station click")
         if (e.ctrlKey && this.selectedStations.size === 1) {
             const [selected] = this.selectedStations;
             this.createTrack(selected, station);

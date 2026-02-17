@@ -166,7 +166,6 @@ export class CanvasHandler {
         });
     }
     handleStationClick(station, e) {
-        console.log("Handle station click");
         if (e.ctrlKey && this.selectedStations.size === 1) {
             const [selected] = this.selectedStations;
             this.createTrack(selected, station);
