@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='../new/Station.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='../new/Track.css'>
+    <script type="module" src="main.js" defer></script>
+</head>
+<body>
+    <div id="sidebar"> 
+            <form id="options">
+                <h3>Options</h3>
+                <div class="option">
+                    <label>Station color</label>
+                    <input type="color">
+                </div>
+                
+                <div class="option">
+                    <label>Track color</label>
+                    <input type="color">
+                </div>
+
+                <div class="option">
+                    <label>Canvas color</label>
+                    <input type="color">
+                </div>
+
+                <div class="option">
+                    <label>Station size</label>
+                    <input type="range">
+                </div>
+
+                <div class="option">
+                    <label>Show station labels</label>
+                    <input type="checkbox">
+                </div>
+
+            </form>
+    </div>
+
+        <div id="container">
+            <div id="canvas"></div>
+            <svg id="svg-layer"></svg>  
+        </div>
+
+</body>
+</html>
