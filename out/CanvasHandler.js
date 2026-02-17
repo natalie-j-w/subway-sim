@@ -24,7 +24,7 @@ export class CanvasHandler {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
             console.log("Observed resize");
         });
-        resizeObserver.observe(canvas);
+        resizeObserver.observe(container);
     }
     /** Get mouse coordinates relative to container */
     getRelativeCoords(e) {
