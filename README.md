@@ -12,7 +12,6 @@ This application allows users to place stations on a canvas, move and rename the
 - HTML and CSS for layout and basic styling
 - Vanilla JavaScript for application logic
 - Event-driven UI interactions
-- Explicit separation between domain state and rendering logic
 - Incremental feature development with an emphasis on clarity and maintainability
 - Intentional use of AI tools (Claude, Gemini, ChatGPT, VSCode agents) as learning aids. **No vibe coding here!**
 
@@ -31,6 +30,7 @@ Check out the connected [Project](https://github.com/users/natalie-j-w/projects/
 - Visual feedback for connections
 - Define subway lines as ordered station sequences
     
+
 
 
 
