@@ -1,5 +1,7 @@
 # subway-sim
 
+https://natalie-j-w.github.io/subway-sim/
+
 Interactive web application for designing subway networks in the browser.
 
 This application allows users to place stations on a canvas, move and rename them, and connect stations to form a network. It focuses on interactive UI state management, event-driven logic, and visual representation of a domain model using vanilla JavaScript.
@@ -10,7 +12,6 @@ This application allows users to place stations on a canvas, move and rename the
 - HTML and CSS for layout and basic styling
 - Vanilla JavaScript for application logic
 - Event-driven UI interactions
-- Explicit separation between domain state and rendering logic
 - Incremental feature development with an emphasis on clarity and maintainability
 - Intentional use of AI tools (Claude, Gemini, ChatGPT, VSCode agents) as learning aids. **No vibe coding here!**
 
@@ -29,6 +30,8 @@ Check out the connected [Project](https://github.com/users/natalie-j-w/projects/
 - Visual feedback for connections
 - Define subway lines as ordered station sequences
     
+
+
 
 
 
