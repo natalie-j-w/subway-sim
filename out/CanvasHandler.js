@@ -6,6 +6,8 @@ export class CanvasHandler {
     container;
     svg;
     canvas;
+    hoveredStation;
+    hoveredTrack;
     selectedTracks = new Set();
     selectedStations = new Set();
     dragState = { isDragging: false };
@@ -164,6 +166,26 @@ export class CanvasHandler {
                 this.dragState = { isDragging: false };
             }
         });
+        this.container.addEventListener('mouseover', e => {
+            const target = e.target;
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                this.hoveredStation = target;
+            }
+        });
+        this.container.addEventListener('mouseout', e => {
+            const target = e.target;
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                this.hoveredStation = null;
+            }
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === "Delete" && this.hoveredStation) {
+                this.deleteStation(this.hoveredStation);
+            }
+            if (e.key === "Delete" && this.hoveredTrack) {
+                this.deleteTrack(this.hoveredTrack);
+            }
+        });
     }
     handleStationClick(station, e) {
         if (e.ctrlKey && this.selectedStations.size === 1) {
@@ -201,6 +223,16 @@ export class CanvasHandler {
         this.selectedStations.clear();
         this.selectedTracks.forEach(t => t.classList.remove("selected"));
         this.selectedTracks.clear();
+    }
+    deleteTrack(tr) {
+        this.svg.removeChild(tr.track);
+        console.log("Deleted", tr);
+    }
+    deleteStation(st) {
+        this.canvas.removeChild(st);
+        const tracks = this.stationConnections.get(st);
+        tracks.forEach(tr => this.deleteTrack(tr));
+        this.stationConnections.delete(st);
     }
 }
 //# sourceMappingURL=CanvasHandler.js.map

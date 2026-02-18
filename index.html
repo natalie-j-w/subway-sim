@@ -15,27 +15,31 @@
             <form id="options">
                 <div class="option">
                     <label>Station color</label>
-                    <input type="color">
+                    <input type="color" id="in-station-col">
                 </div>
                 
                 <div class="option">
                     <label>Track color</label>
-                    <input type="color">
+                    <input type="color" id="in-track-col">
                 </div>
 
                 <div class="option">
                     <label>Canvas color</label>
-                    <input type="color">
+                    <input type="color" id="in-canvas-col">
+
                 </div>
 
                 <div class="option">
-                    <label>Station size</label>
-                    <input type="range">
+                    <label>Station size (px)</label>
+                    <div id="size-slider">
+                        <input id="in-station-size" type="range" min="10" max="50" step="10">
+                        <output>0</output>
+                    </div>
                 </div>
 
                 <div class="option">
                     <label>Show station labels</label>
-                    <input type="checkbox">
+                    <input type="checkbox" id="in-show-station-labels">
                 </div>
 
             </form>

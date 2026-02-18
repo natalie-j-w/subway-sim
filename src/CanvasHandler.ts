@@ -30,6 +30,9 @@ export class CanvasHandler {
     svg: SVGElement
     canvas: HTMLElement
 
+    hoveredStation: HTMLElement;
+    hoveredTrack: TrackConnection;
+
     selectedTracks = new Set<SVGLineElement>();
     selectedStations = new Set<HTMLElement>();
     
@@ -222,6 +225,30 @@ export class CanvasHandler {
                 this.dragState = { isDragging: false };
             }
         });
+
+        this.container.addEventListener('mouseover', e => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                this.hoveredStation = target;
+            }
+        });
+
+        this.container.addEventListener('mouseout', e => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
+                this.hoveredStation = null;
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === "Delete" && this.hoveredStation) {
+                this.deleteStation(this.hoveredStation);
+            }
+
+            if (e.key === "Delete" && this.hoveredTrack) {
+                this.deleteTrack(this.hoveredTrack);
+            }
+        })
     }
 
     private handleStationClick(station: HTMLElement, e: MouseEvent): void {
@@ -268,5 +295,18 @@ export class CanvasHandler {
         this.selectedStations.clear();
         this.selectedTracks.forEach(t => t.classList.remove("selected"));
         this.selectedTracks.clear();
+    }
+
+    deleteTrack(tr: TrackConnection): void {
+        this.svg.removeChild(tr.track);
+        console.log("Deleted", tr)
+
+    }
+
+    deleteStation(st: HTMLElement): void {
+        this.canvas.removeChild(st);
+        const tracks = this.stationConnections.get(st)
+        tracks.forEach(tr => this.deleteTrack(tr));
+        this.stationConnections.delete(st);  
     }
 }
