@@ -15,8 +15,8 @@ export class Track {
         this.parent = parent;
         this.stations = stations;
         this.coords = {
-            x1: this.stations.startpoint.x, y1: this.stations.startpoint.y,
-            x2: this.stations.endpoint.y, y2: this.stations.endpoint.y
+            x1: this.stations.startpoint.coords.x, y1: this.stations.startpoint.coords.y,
+            x2: this.stations.endpoint.coords.x, y2: this.stations.endpoint.coords.y
         }
         this.element = this.createDomElement();
         (this.element as any)._trackInstance = this;
@@ -27,18 +27,14 @@ export class Track {
         const newTrack = document.createElementNS(SVG_NAMESPACE, "line");
         const newSelectionLine = document.createElementNS(SVG_NAMESPACE, "line");
 
-        newSelectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
         newTrack.classList.add(CSS_VARS.TRACK_CLASSNAME);
-
-        const s1Center = this.stations.startpoint.getCenterCoords();
-        const s2Center = this.stations.endpoint.getCenterCoords();
-        const coords: TrackCoordinate = { x1: s1Center.x, y1: s1Center.y, x2: s2Center.x, y2: s2Center.y };
+        newSelectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
 
         [newSelectionLine, newTrack].forEach(line => {
-            line.setAttribute("x1", String(coords.x1));
-            line.setAttribute("y1", String(coords.y1));
-            line.setAttribute("x2", String(coords.x2));
-            line.setAttribute("y2", String(coords.y2));
+            line.setAttribute("x1", String(this.coords.x1));
+            line.setAttribute("y1", String(this.coords.y1));
+            line.setAttribute("x2", String(this.coords.x2));
+            line.setAttribute("y2", String(this.coords.y2));
         });
 
         group.appendChild(newSelectionLine);
@@ -47,16 +43,19 @@ export class Track {
 
         this.stations.startpoint.addTrack(this);
         this.stations.endpoint.addTrack(this);
+        this.selectionElement = newSelectionLine;
 
         return newTrack;
     }
 
     select() {
         this.element.classList.add("selected");
+        // console.log("Selected", this);
     }
 
     deselect() {
         this.element.classList.remove("selected");
+        // console.log("Deselected", this);
     }
 
     /**
@@ -81,7 +80,6 @@ export class Track {
     }
 
     delete() {
-        this.parent.removeChild(this.element);
-        this.parent.removeChild(this.selectionElement);
+        this.element.parentElement.remove();
     }
 }

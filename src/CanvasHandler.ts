@@ -1,44 +1,45 @@
-import {CSS_VARS} from "../constants.js";
-import {Coordinate, LineCoordinate, TrackConnection} from "../out/Interfaces.js"
-
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-
-const VAR_DOT_SIZE = parseFloat(
-    getComputedStyle(document.documentElement)
-        .getPropertyValue(CSS_VARS.STATION_SIZE)
-);
+import { CSS_VARS } from "../constants.js";
+import { Coordinate, TrackStations } from "./Interfaces"
+import { Station } from "./Station.js";
+import { Track } from "./Track.js";
 
 export class CanvasHandler {
     container: HTMLElement
     svg: SVGElement
     canvas: HTMLElement
 
-    hoveredStation: HTMLElement;
-    hoveredTrack: TrackConnection;
+    stationInstances: Map<HTMLElement, Station> = new Map<HTMLElement, Station>()
+    trackInstances: Map<SVGLineElement,Track> = new Map<SVGLineElement, Track>()
 
-    selectedTracks = new Set<SVGLineElement>();
-    selectedStations = new Set<HTMLElement>();
+    hoveredStation: Station;
+    hoveredTrack: Track;
+
+    selectedTrackElements: HTMLCollection;
+    selectedStationElements: HTMLCollection;
     
     dragState: {
-        station?: HTMLElement;
+        station?: Station;
         startPos?: Coordinate;
         isDragging: boolean;
     } = { isDragging: false };
 
-    /** Map: Station → Array of {track, endpoint} */
-    stationConnections = new WeakMap<HTMLElement, TrackConnection[]>();
 
     constructor(container: HTMLElement, svg: SVGElement, canvas: HTMLElement) {
         this.container = container;
         this.svg = svg;
         this.canvas = canvas;
+
+        this.selectedStationElements = document.getElementsByClassName(CSS_VARS.STATION_CLASSNAME + " selected");
+        this.selectedTrackElements = document.getElementsByClassName(CSS_VARS.TRACK_CLASSNAME + " selected")
         
         this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
         this.setupEventListeners();
 
         const s1 = this.createStation({x: 30, y: 30});
-        const s2 = this.createStation({x: 400, y: 300});
-        this.createTrack(s1, s2);
+        const s2 = this.createStation({x: 100, y: 200});
+        const tr = this.createTrack({"startpoint": s1, "endpoint": s2});
+        console.log(s1, s2, tr)
+        this.clearSelection();
 
         const resizeObserver = new ResizeObserver(() => {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
@@ -47,98 +48,13 @@ export class CanvasHandler {
         resizeObserver.observe(container);
     }
 
-    /** Get mouse coordinates relative to container */
-    private getRelativeCoords(e: MouseEvent): Coordinate {
+    /** Get mouse coordinates relative to canvas container */
+    private getRelativeCoords(coords: Coordinate): Coordinate {
         const bounds = this.container.getBoundingClientRect();
         return {
-            x: e.clientX - bounds.left,
-            y: e.clientY - bounds.top
+            x: coords.x - bounds.left,
+            y: coords.y - bounds.top
         };
-    }
-
-    /** Get station center coordinates */
-    private getStationCenter(station: HTMLElement): Coordinate {
-        return {
-            x: parseFloat(station.style.left) + VAR_DOT_SIZE / 2,
-            y: parseFloat(station.style.top) + VAR_DOT_SIZE / 2
-        };
-    }
-
-    createStation(coord: Coordinate, name: string = "Unnamed"): HTMLElement {
-        const station = document.createElement("div");
-        const label = document.createElement("div");
-
-        station.classList.add(CSS_VARS.STATION_CLASSNAME);
-        label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME);
-        label.textContent = name;
-
-        station.style.position = "absolute";
-        station.style.left = `${coord.x - VAR_DOT_SIZE / 2}px`;
-        station.style.top = `${coord.y - VAR_DOT_SIZE / 2}px`;
-
-        station.appendChild(label);
-        this.canvas.appendChild(station);
-
-        this.stationConnections.set(station, []);
-        
-        return station;
-    }
-
-    createTrack(station1: HTMLElement, station2: HTMLElement): SVGLineElement {
-        const group = document.createElementNS(SVG_NAMESPACE, "g");
-        
-        // Selection line (invisible + thicker, for easier clicking)
-        const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
-        selectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
-        
-        // Actual track line
-        const track = document.createElementNS(SVG_NAMESPACE, "line");
-        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
-
-        const s1Center = this.getStationCenter(station1);
-        const s2Center = this.getStationCenter(station2);
-        const coords: LineCoordinate = { x1:s1Center.x, y1: s1Center.y, x2: s2Center.x, y2: s2Center.y };
-
-        [selectionLine, track].forEach(line => {
-            line.setAttribute("x1", String(coords.x1));
-            line.setAttribute("y1", String(coords.y1));
-            line.setAttribute("x2", String(coords.x2));
-            line.setAttribute("y2", String(coords.y2));
-        });
-
-        group.appendChild(selectionLine);
-        group.appendChild(track);
-        this.svg.appendChild(group);
-
-        this.stationConnections.get(station1)!.push({ track, endpoint: 'start' });
-        this.stationConnections.get(station2)!.push({ track, endpoint: 'end' });
-
-        return track;
-    }
-
-    private updateStationPosition(station: HTMLElement, coord: Coordinate): void {
-        station.style.left = `${coord.x - VAR_DOT_SIZE / 2}px`;
-        station.style.top = `${coord.y - VAR_DOT_SIZE / 2}px`;
-
-        // Update connected tracks
-        const connections = this.stationConnections.get(station);
-        if (!connections) return;
-
-        connections.forEach(({ track, endpoint }) => {
-            const selectionLine = track.previousElementSibling as SVGLineElement;
-            
-            if (endpoint === 'start') {
-                track.setAttribute("x1", String(coord.x));
-                track.setAttribute("y1", String(coord.y));
-                selectionLine?.setAttribute("x1", String(coord.x));
-                selectionLine?.setAttribute("y1", String(coord.y));
-            } else {
-                track.setAttribute("x2", String(coord.x));
-                track.setAttribute("y2", String(coord.y));
-                selectionLine?.setAttribute("x2", String(coord.x));
-                selectionLine?.setAttribute("y2", String(coord.y));
-            }
-        });
     }
 
     setupEventListeners(): void {
@@ -165,30 +81,29 @@ export class CanvasHandler {
             const target = e.target as HTMLElement;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 const newName = prompt("New name for station:");
-                if (newName) {
-                    const label = target.firstChild as HTMLElement;
-                    label.textContent = newName;
-                }
+                this.stationInstances.get(target).rename(newName);
             }
         });
 
+        /** Grab station */
         this.container.addEventListener('mousedown', e => {
             const target = e.target as HTMLElement;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME) && !e.ctrlKey) {
-                this.clearSelection();
-                this.selectStation(target);
+                const st = this.stationInstances.get(target)
+                this.selectElement(st, true)
                 this.dragState = {
-                    station: target,
-                    startPos: this.getRelativeCoords(e),
+                    station: st,
+                    startPos: this.getRelativeCoords({x: e.pageX, y: e.pageY}),
                     isDragging: false
                 };
             }
         });
 
+        /** Drag station */
         this.container.addEventListener('mousemove', e => {
             if (!this.dragState.station || !this.dragState.startPos) return;
 
-            const currentPos = this.getRelativeCoords(e);
+            const currentPos = this.getRelativeCoords({x: e.pageX, y: e.pageY});
             const dx = currentPos.x - this.dragState.startPos.x;
             const dy = currentPos.y - this.dragState.startPos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -196,23 +111,26 @@ export class CanvasHandler {
             if (distance > 3) {
                 if (!this.dragState.isDragging) {
                     this.dragState.isDragging = true;
-                    this.dragState.station.classList.add("dragging");
+                    this.dragState.station.startDrag();
                 }
-                this.updateStationPosition(this.dragState.station, currentPos);
+                this.dragState.station.move(currentPos)
             }
         });
 
+        /** Drop dragged station */
         this.container.addEventListener('mouseup', () => {
             if (this.dragState.station) {
-                this.dragState.station.classList.remove("dragging");
+                this.dragState.station.endDrag()
                 this.dragState = { isDragging: false };
             }
         });
 
         this.container.addEventListener('mouseover', e => {
-            const target = e.target as HTMLElement;
+            const target = e.target as Element;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
-                this.hoveredStation = target;
+                this.hoveredStation = this.stationInstances.get(target as HTMLElement);
+            } else if (target.classList.contains(CSS_VARS.SELECTION_LINE_CLASSNAME)) {
+                this.hoveredTrack = this.trackInstances.get(target.nextElementSibling as SVGLineElement);
             }
         });
 
@@ -223,74 +141,84 @@ export class CanvasHandler {
             }
         });
 
+        /** Delete station or track by hovering + del key */
         document.addEventListener('keydown', e => {
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             if (e.key === "Delete" && this.hoveredStation) {
-                this.deleteStation(this.hoveredStation);
+                this.hoveredStation.delete();
+                this.hoveredStation = null;
             }
 
-            if (e.key === "Delete") {
-                console.log(e.target)
-                // this.deleteTrack(this.hoveredTrack);
+            if (e.key === "Delete" && this.hoveredTrack) {
+                this.hoveredTrack.delete();
+                this.hoveredTrack = null;
             }
         })
     }
 
     private handleStationClick(station: HTMLElement, e: MouseEvent): void {
-        if (e.ctrlKey && this.selectedStations.size === 1) {
-            const [selected] = this.selectedStations;
-            this.createTrack(selected, station);
+        const stationInstance = this.stationInstances.get(station);
+        if (e.ctrlKey && this.selectedStationElements.length === 1) {
+            const [selected] = this.selectedStationElements;
+            this.createTrack({"startpoint": this.stationInstances.get(selected as HTMLElement), "endpoint": stationInstance});
         }
         
         this.clearSelection();
-        this.selectStation(station);
+        stationInstance.select();
     }
 
+    /** Select track */
     private handleTrackClick(track: SVGLineElement, e: MouseEvent): void {
         e.stopPropagation();
         this.clearSelection();
-        this.selectTrack(track);
+        this.selectElement(this.trackInstances.get(track))
     }
 
+    /** Click canvas to create station */
     private handleCanvasClick(e: MouseEvent): void {
-        const coord = this.getRelativeCoords(e);
-        const newStation = this.createStation(coord);
-        
-        if (e.ctrlKey && this.selectedStations.size === 1) {
-            const [selected] = this.selectedStations;
-            this.createTrack(selected, newStation);
-        }
-        
+        const coord = this.getRelativeCoords({x: e.pageX, y: e.pageY});
+        const [s1] = this.selectedStationElements;
+        const s2 = this.createStation(coord, false);
+
         this.clearSelection();
-        this.selectStation(newStation);
+        s2.select();
+        
+        if (e.ctrlKey && this.selectedStationElements.length == 1) {
+            const tr = this.createTrack({"startpoint": this.stationInstances.get(s1 as HTMLElement), "endpoint": s2})
+        }
     }
 
-    selectStation(station: HTMLElement): void {
-        station.classList.add("selected");
-        this.selectedStations.add(station);
+    /** Deselect all selected stations and tracks */
+    clearSelection(): void {            
+        [...this.selectedStationElements].forEach(s => this.stationInstances.get(s as HTMLElement).deselect());
+        [...this.selectedTrackElements].forEach(tr => this.trackInstances.get(tr as SVGLineElement).deselect());
     }
 
-    selectTrack(track: SVGLineElement): void {
-        track.classList.add("selected");
-        this.selectedTracks.add(track);
+    /**
+     * 
+     * @param coords 
+     * @param select True to select station after creation. Default: false
+     * @returns 
+     */
+    createStation(coords: Coordinate, select: boolean = false): Station {
+        const newSt = new Station(this.canvas, coords);
+        this.stationInstances.set(newSt.element, newSt);
+        if (select) this.selectElement(newSt, true);
+        return newSt;
     }
 
-    clearSelection(): void {
-        this.selectedStations.forEach(s => s.classList.remove("selected"));
-        this.selectedStations.clear();
-        this.selectedTracks.forEach(t => t.classList.remove("selected"));
-        this.selectedTracks.clear();
+    createTrack(stations: TrackStations): Track {
+        const newTr = new Track(this.svg, stations);
+        this.trackInstances.set(newTr.element, newTr);
+        return newTr;
     }
 
-    // deleteTrack(tr: TrackConnection): void {
-    //     this.svg.removeChild(tr.track);
-    //     console.log("Deleted", tr)
-    // }
-
-    deleteStation(st: HTMLElement): void {
-        this.canvas.removeChild(st);
-        const tracks = this.stationConnections.get(st)
-        // tracks.forEach(tr => this.deleteTrack(tr));
-        this.stationConnections.delete(st);  
+    /**
+     * 
+     * @param elem 
+     * @param clear True to clear entire selection before selecting element. Default: false.
+     */
+    selectElement(elem: Station | Track, clear: boolean = false): void {
+        if (clear) this.clearSelection();
+        elem.select();
     }
 }

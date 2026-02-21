@@ -4,6 +4,6 @@
     "module": "es2020",
     "sourceMap": true,
     "outDir": "../out",
-    "moduleDetection": "force" 
+    "moduleDetection": "force"
     }
 }

@@ -6,39 +6,43 @@ export class Track {
     parent;
     stations;
     coords;
-    constructor(parent, coords) {
+    constructor(parent, stations) {
         this.parent = parent;
-        this.coords = coords;
+        this.stations = stations;
+        this.coords = {
+            x1: this.stations.startpoint.coords.x, y1: this.stations.startpoint.coords.y,
+            x2: this.stations.endpoint.coords.x, y2: this.stations.endpoint.coords.y
+        };
         this.element = this.createDomElement();
         this.element._trackInstance = this;
     }
     createDomElement() {
         const group = document.createElementNS(SVG_NAMESPACE, "g");
-        const track = document.createElementNS(SVG_NAMESPACE, "line");
-        const selectionLine = document.createElementNS(SVG_NAMESPACE, "line");
-        selectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
-        track.classList.add(CSS_VARS.TRACK_CLASSNAME);
-        const s1Center = this.stations.startpoint.getCenterCoords();
-        const s2Center = this.stations.endpoint.getCenterCoords();
-        const coords = { x1: s1Center.x, y1: s1Center.y, x2: s2Center.x, y2: s2Center.y };
-        [selectionLine, track].forEach(line => {
-            line.setAttribute("x1", String(coords.x1));
-            line.setAttribute("y1", String(coords.y1));
-            line.setAttribute("x2", String(coords.x2));
-            line.setAttribute("y2", String(coords.y2));
+        const newTrack = document.createElementNS(SVG_NAMESPACE, "line");
+        const newSelectionLine = document.createElementNS(SVG_NAMESPACE, "line");
+        newTrack.classList.add(CSS_VARS.TRACK_CLASSNAME);
+        newSelectionLine.classList.add(CSS_VARS.SELECTION_LINE_CLASSNAME);
+        [newSelectionLine, newTrack].forEach(line => {
+            line.setAttribute("x1", String(this.coords.x1));
+            line.setAttribute("y1", String(this.coords.y1));
+            line.setAttribute("x2", String(this.coords.x2));
+            line.setAttribute("y2", String(this.coords.y2));
         });
-        group.appendChild(selectionLine);
-        group.appendChild(track);
+        group.appendChild(newSelectionLine);
+        group.appendChild(newTrack);
         this.parent.appendChild(group);
         this.stations.startpoint.addTrack(this);
         this.stations.endpoint.addTrack(this);
-        return track;
+        this.selectionElement = newSelectionLine;
+        return newTrack;
     }
     select() {
         this.element.classList.add("selected");
+        // console.log("Selected", this);
     }
     deselect() {
         this.element.classList.remove("selected");
+        // console.log("Deselected", this);
     }
     /**
      * Moves track with provided station if station is either the start or endpoint.
@@ -63,7 +67,7 @@ export class Track {
         }
     }
     delete() {
-        this.parent;
+        this.element.parentElement.remove();
     }
 }
 //# sourceMappingURL=Track.js.map

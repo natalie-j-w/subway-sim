@@ -1,15 +1,13 @@
 import {CSS_VARS} from "../constants.js"
-import {Coordinate} from "../out/Interfaces.js"
-import { Track } from "../out/Track.js";
+import {Coordinate} from "./Interfaces.js"
+import { Track } from "./Track.js";
 
-const VAR_STATION_SIZE = parseFloat(
-    getComputedStyle(document.documentElement)
-        .getPropertyValue(CSS_VARS.STATION_SIZE)
-    );
+
 
 export class Station {
     parent: HTMLElement;
     element: HTMLElement;
+    labelElement: HTMLElement;
     coords: Coordinate;
     name: string = "Unnamed";
     tracks: Set<Track> = new Set();
@@ -17,11 +15,10 @@ export class Station {
     constructor(parent: HTMLElement, coord: Coordinate, name: string = "Unnamed") {
         this.parent = parent;
         this.coords = coord;
-        this.element = this.createDomElement();
-        (this.element as any)._stationInstance = this;
+        this.createDomElement();
     }
 
-    private createDomElement(): HTMLElement {
+    private createDomElement(): void {
         const station = document.createElement("div");
         const label = document.createElement("div");
 
@@ -30,20 +27,15 @@ export class Station {
         label.textContent = this.name;
 
         station.style.position = "absolute";
-        station.style.left = `${this.coords.x - VAR_STATION_SIZE / 2}px`;
-        station.style.top = `${this.coords.y - VAR_STATION_SIZE / 2}px`;
+
+        station.style.left = `${this.coords.x}px`;
+        station.style.top = `${this.coords.y}px`;
 
         station.appendChild(label);
         this.parent.appendChild(station)
 
-        return station;
-    }
-
-    getCenterCoords(): Coordinate {
-        return {
-            x: this.coords.x + VAR_STATION_SIZE / 2,
-            y: this.coords.y + VAR_STATION_SIZE / 2
-        };
+        this.element = station;
+        this.labelElement = label;
     }
 
     addTrack(tr: Track) {
@@ -56,10 +48,12 @@ export class Station {
 
     select() {
         this.element.classList.add("selected");
+        // console.log("Selected", this)
     }
 
     deselect() {
         this.element.classList.remove("selected");
+        // console.log("Deselected", this);
     }
 
     delete() {
@@ -68,12 +62,31 @@ export class Station {
 
     move(newCoords: Coordinate) {
         this.coords = newCoords;
-        this.element.style.left = `${this.coords.x - VAR_STATION_SIZE / 2}px`;
-        this.element.style.top = `${this.coords.y - VAR_STATION_SIZE / 2}px`;
+        this.element.style.left = `${this.coords.x}px`;
+        this.element.style.top = `${this.coords.y}px`;
 
         this.tracks.forEach(tr => {
             tr.moveWithStation(this);
         })
+    }
+
+    startDrag() {
+        this.element.classList.add("dragging");
+        // console.log("Started dragging", this)
+    }
+
+    endDrag() {
+        this.element.classList.remove("dragging");
+        // console.log("Stopped dragging", this)
+    }
+
+    rename(newName: string) {
+        if (this.name === newName) return;
+        else {
+            console.log(`Renamed`, this, `from ${this.name} to ${newName}`)
+            this.name = newName;
+            this.labelElement.textContent = this.name;
+        }
     }
 }
 
