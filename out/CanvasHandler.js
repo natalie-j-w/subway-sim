@@ -179,11 +179,13 @@ export class CanvasHandler {
             }
         });
         document.addEventListener('keydown', e => {
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             if (e.key === "Delete" && this.hoveredStation) {
                 this.deleteStation(this.hoveredStation);
             }
-            if (e.key === "Delete" && this.hoveredTrack) {
-                this.deleteTrack(this.hoveredTrack);
+            if (e.key === "Delete") {
+                console.log(e.target);
+                // this.deleteTrack(this.hoveredTrack);
             }
         });
     }
@@ -224,14 +226,14 @@ export class CanvasHandler {
         this.selectedTracks.forEach(t => t.classList.remove("selected"));
         this.selectedTracks.clear();
     }
-    deleteTrack(tr) {
-        this.svg.removeChild(tr.track);
-        console.log("Deleted", tr);
-    }
+    // deleteTrack(tr: TrackConnection): void {
+    //     this.svg.removeChild(tr.track);
+    //     console.log("Deleted", tr)
+    // }
     deleteStation(st) {
         this.canvas.removeChild(st);
         const tracks = this.stationConnections.get(st);
-        tracks.forEach(tr => this.deleteTrack(tr));
+        // tracks.forEach(tr => this.deleteTrack(tr));
         this.stationConnections.delete(st);
     }
 }

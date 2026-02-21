@@ -20,7 +20,7 @@
 .station-dot__label {
     position: absolute;
     display:block;
-    top: 25px;
+    bottom: -25px;
     pointer-events:none;
     user-select:none;
 }

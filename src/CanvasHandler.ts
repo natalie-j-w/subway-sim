@@ -1,29 +1,12 @@
 import {CSS_VARS} from "../constants.js";
+import {Coordinate, LineCoordinate, TrackConnection} from "../out/Interfaces.js"
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-
-interface Coordinate {
-    x: number,
-    y: number
-}
-
-interface LineCoordinate {
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-}
 
 const VAR_DOT_SIZE = parseFloat(
     getComputedStyle(document.documentElement)
         .getPropertyValue(CSS_VARS.STATION_SIZE)
 );
-
-interface TrackConnection {
-    track: SVGLineElement;
-    /** 'start' if station is at x1,y1; 'end' if at x2,y2 */
-    endpoint: 'start' | 'end';
-}
 
 export class CanvasHandler {
     container: HTMLElement
@@ -241,12 +224,14 @@ export class CanvasHandler {
         });
 
         document.addEventListener('keydown', e => {
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             if (e.key === "Delete" && this.hoveredStation) {
                 this.deleteStation(this.hoveredStation);
             }
 
-            if (e.key === "Delete" && this.hoveredTrack) {
-                this.deleteTrack(this.hoveredTrack);
+            if (e.key === "Delete") {
+                console.log(e.target)
+                // this.deleteTrack(this.hoveredTrack);
             }
         })
     }
@@ -297,16 +282,15 @@ export class CanvasHandler {
         this.selectedTracks.clear();
     }
 
-    deleteTrack(tr: TrackConnection): void {
-        this.svg.removeChild(tr.track);
-        console.log("Deleted", tr)
-
-    }
+    // deleteTrack(tr: TrackConnection): void {
+    //     this.svg.removeChild(tr.track);
+    //     console.log("Deleted", tr)
+    // }
 
     deleteStation(st: HTMLElement): void {
         this.canvas.removeChild(st);
         const tracks = this.stationConnections.get(st)
-        tracks.forEach(tr => this.deleteTrack(tr));
+        // tracks.forEach(tr => this.deleteTrack(tr));
         this.stationConnections.delete(st);  
     }
 }
