@@ -126,11 +126,18 @@ export class CanvasHandler {
             }
         });
         this.container.addEventListener('dblclick', e => {
+            // e.preventDefault();
             const target = e.target;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 const newName = prompt("New name for station:");
                 this.stationInstances.get(target).rename(newName);
             }
+            //   if (document.getSelection() && document.getSelection().empty) {
+            //         document.getSelection = undefined;
+            //     } else if (window.getSelection) {
+            //         const selection = window.getSelection();
+            //         selection.removeAllRanges();
+            //     }
         });
         /** Grab station */
         this.container.addEventListener('mousedown', e => {
