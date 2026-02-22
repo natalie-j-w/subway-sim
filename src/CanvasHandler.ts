@@ -325,14 +325,4 @@ export class CanvasHandler {
         if (clear) this.clearSelection();
         elem.select();
     }
-
-    /**
-     * Set label visibility of all stations on the canvas to given value.
-     * @param val 
-     */
-    setStationLabelVisibility(val: boolean) {
-        this.stationInstances.forEach(st => {
-            st.setLabelVisibility(val);
-        })
-    }
 }
