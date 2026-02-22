@@ -30,6 +30,8 @@ export class Station {
     name: string = "Unnamed";
     /** Set of tracks connected to this station */
     tracks: Set<Track> = new Set();
+    /** Set label visibility */
+    labelVisible: boolean = true;
 
     /**
      * Creates a new Station instance and initializes its DOM element.
@@ -161,6 +163,11 @@ export class Station {
             this.name = newName;
             this.labelElement.textContent = this.name;
         }
+    }
+
+    setLabelVisibility(val: boolean) {
+        this.labelVisible = val;
+        this.labelElement.style.display = this.labelVisible ? "block" : "none";
     }
 }
 
