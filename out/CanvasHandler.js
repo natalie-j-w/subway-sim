@@ -1,17 +1,65 @@
 import { CSS_VARS } from "../constants.js";
 import { Station } from "./Station.js";
 import { Track } from "./Track.js";
+/**
+ * Manages all canvas interactions and DOM element creation for the subway simulator.
+ * Handles event listeners for user interactions including station/track creation, selection, and dragging.
+ * Maintains maps of stations and tracks for quick instance lookup.
+ *
+ * @class CanvasHandler
+ * @property container - The main container element for the canvas
+ * @property svg - The SVG element for rendering tracks
+ * @property {HTMLElement} canvas - The canvas element for rendering stations
+ * @property {Map<HTMLElement, Station>} stationInstances - Map of station DOM elements to Station instances
+ * @property {Map<SVGLineElement, Track>} trackInstances - Map of track SVG elements to Track instances
+ * @property {Station} hoveredStation - The currently hovered station (if any)
+ * @property {Track} hoveredTrack - The currently hovered track (if any)
+ * @property {HTMLCollection} selectedStationElements - Collection of currently selected station elements
+ * @property {HTMLCollection} selectedTrackElements - Collection of currently selected track elements
+ * @property {Object} dragState - Object tracking current drag operation state
+ * @property {Station} dragState.station - The station being dragged (if any)
+ * @property {Coordinate} dragState.startPos - The starting position of the drag
+ * @property {boolean} dragState.isDragging - Whether a drag is currently in progress
+ *
+ * @example
+ * const handler = new CanvasHandler(containerElement, svgElement, canvasElement);
+ * // Stations and a sample track are created automatically
+ */
 export class CanvasHandler {
+    /** The main container element for the entire canvas application */
     container;
+    /** The SVG element used for rendering track lines */
     svg;
+    /** The HTML canvas/container element for rendering stations */
     canvas;
+    /** Map of station DOM elements to their Station instances for quick lookup */
     stationInstances = new Map();
+    /** Map of track SVG line elements to their Track instances for quick lookup */
     trackInstances = new Map();
+    /** The station currently being hovered over by the mouse */
     hoveredStation;
+    /** The track currently being hovered over by the mouse */
     hoveredTrack;
-    selectedTrackElements;
+    /** Collection of currently selected station DOM elements */
     selectedStationElements;
+    /** Collection of currently selected track DOM elements */
+    selectedTrackElements;
+    /**
+     * State object tracking the current drag operation on a station.
+     * @property {Station} [station] - The station currently being dragged
+     * @property {Coordinate} [startPos] - The starting position coordinates of the drag
+     * @property {boolean} isDragging - Flag indicating whether an active drag is in progress
+     */
     dragState = { isDragging: false };
+    /**
+     * Initializes the CanvasHandler with DOM elements and sets up event listeners.
+     * Creates sample stations and a connecting track for demonstration.
+     * Also sets up a ResizeObserver to adjust the SVG viewBox when the container resizes.
+     *
+     * @param {HTMLElement} container - The main container element
+     * @param {SVGElement} svg - The SVG element for rendering tracks
+     * @param {HTMLElement} canvas - The canvas element for rendering stations
+     */
     constructor(container, svg, canvas) {
         this.container = container;
         this.svg = svg;
@@ -30,7 +78,14 @@ export class CanvasHandler {
         });
         resizeObserver.observe(container);
     }
-    /** Get mouse coordinates relative to canvas container */
+    /**
+     * Converts absolute page coordinates to coordinates relative to the canvas container.
+     * Takes into account the container's position on the page using getBoundingClientRect.
+     *
+     * @private
+     * @param {Coordinate} coords - The absolute page coordinates
+     * @returns {Coordinate} The relative coordinates within the container
+     */
     getRelativeCoords(coords) {
         const bounds = this.container.getBoundingClientRect();
         return {
@@ -38,6 +93,19 @@ export class CanvasHandler {
             y: coords.y - bounds.top
         };
     }
+    /**
+     * Sets up all event listeners for user interactions.
+     * Handles the following events and actions:
+     * - Click: Select stations/tracks, create new stations, connect stations with tracks
+     * - Double-click: Rename stations
+     * - Mouse down: Start dragging a station
+     * - Mouse move: Update dragged station position
+     * - Mouse up: End dragging a station
+     * - Mouse over/out: Track hovered elements
+     * - Key down: Delete hovered station/track with Delete key
+     *
+     * @private
+     */
     setupEventListeners() {
         this.container.addEventListener('click', e => {
             if (this.dragState.isDragging) {
@@ -128,25 +196,51 @@ export class CanvasHandler {
             }
         });
     }
+    /**
+     * Handles click events on station elements.
+     * Supports creating tracks by Ctrl+clicking two stations.
+     * Deselects all other elements and selects the clicked station.
+     *
+     * @private
+     * @param {HTMLElement} station - The clicked station DOM element
+     * @param {MouseEvent} e - The click event object
+     */
     handleStationClick(station, e) {
         const stationInstance = this.stationInstances.get(station);
         if (e.ctrlKey && this.selectedStationElements.length === 1) {
-            const [selected] = this.selectedStationElements;
+            const selected = this.selectedStationElements[0];
             this.createTrack({ "startpoint": this.stationInstances.get(selected), "endpoint": stationInstance });
         }
         this.clearSelection();
         stationInstance.select();
     }
     /** Select track */
+    /**
+     * Handles click events on track elements.
+     * Deselects all other elements and selects the clicked track.
+     * Prevents the click event from propagating to the canvas.
+     *
+     * @private
+     * @param {SVGLineElement} track - The clicked track SVG line element
+     * @param {MouseEvent} e - The click event object
+     */
     handleTrackClick(track, e) {
         e.stopPropagation();
         this.clearSelection();
         this.selectElement(this.trackInstances.get(track));
     }
     /** Click canvas to create station */
+    /**
+     * Handles click events on empty canvas areas.
+     * Creates a new station at the click position.
+     * If a station is already selected and Ctrl is held, creates a track connecting the two stations.
+     *
+     * @private
+     * @param {MouseEvent} e - The click event object
+     */
     handleCanvasClick(e) {
         const coord = this.getRelativeCoords({ x: e.pageX, y: e.pageY });
-        const [s1] = this.selectedStationElements;
+        const s1 = this.selectedStationElements[0];
         const s2 = this.createStation(coord, false);
         this.clearSelection();
         s2.select();
@@ -155,15 +249,27 @@ export class CanvasHandler {
         }
     }
     /** Deselect all selected stations and tracks */
+    /**
+     * Deselects all currently selected stations and tracks.
+     * Removes the "selected" CSS class from all selected elements.
+     */
     clearSelection() {
-        [...this.selectedStationElements].forEach(s => this.stationInstances.get(s).deselect());
-        [...this.selectedTrackElements].forEach(tr => this.trackInstances.get(tr).deselect());
+        Array.from(this.selectedStationElements).forEach(s => this.stationInstances.get(s).deselect());
+        Array.from(this.selectedTrackElements).forEach(tr => this.trackInstances.get(tr).deselect());
     }
     /**
      *
      * @param coords
      * @param select True to select station after creation. Default: false
      * @returns
+     */
+    /**
+     * Creates a new station at the specified coordinates.
+     * Registers the station in the stationInstances map for quick lookup.
+     *
+     * @param {Coordinate} coords - The position where the station should be created
+     * @param {boolean} [select=false] - If true, automatically selects the newly created station
+     * @returns {Station} The newly created Station instance
      */
     createStation(coords, select = false) {
         const newSt = new Station(this.canvas, coords);
@@ -172,6 +278,13 @@ export class CanvasHandler {
             this.selectElement(newSt, true);
         return newSt;
     }
+    /**
+     * Creates a new track connecting two stations.
+     * Registers the track in the trackInstances map for quick lookup.
+     *
+     * @param {TrackStations} stations - Object containing startpoint and endpoint Station instances
+     * @returns {Track} The newly created Track instance
+     */
     createTrack(stations) {
         const newTr = new Track(this.svg, stations);
         this.trackInstances.set(newTr.element, newTr);
@@ -182,10 +295,25 @@ export class CanvasHandler {
      * @param elem
      * @param clear True to clear entire selection before selecting element. Default: false.
      */
+    /**
+     * Selects a single element (station or track), optionally clearing all other selections first.
+     *
+     * @param {Station | Track} elem - The element to select (Station or Track instance)
+     * @param {boolean} [clear=false] - If true, clears all other selections before selecting this element
+     */
     selectElement(elem, clear = false) {
         if (clear)
             this.clearSelection();
         elem.select();
+    }
+    /**
+     * Set label visibility of all stations on the canvas to given value.
+     * @param val
+     */
+    setStationLabelVisibility(val) {
+        this.stationInstances.forEach(st => {
+            st.setLabelVisibility(val);
+        });
     }
 }
 //# sourceMappingURL=CanvasHandler.js.map

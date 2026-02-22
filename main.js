@@ -13,7 +13,6 @@ const canvasHandler = new CanvasHandler(container, svg, canvas);
 
 // Application state
 
-canvasHandler.showStationLabels = true;
 console.log(inputStationSize)
 inputStationSize.value = "20";
 outputStationSize.value = inputStationSize.value;

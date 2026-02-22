@@ -1,0 +1,14 @@
+{
+  "name": "subway-sim",
+  "version": "1.0.0",
+  "description": "Interactive subway simulator with stations and tracks",
+  "main": "main.js",
+  "scripts": {
+    "build": "tsc -p src/tsconfig.json",
+    "type-docs": "typedoc --tsconfig src/tsconfig.json --entryPoints src --out docs --entryPointStrategy expand"
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.17",
+    "typescript": "^5.0.0"
+  }
+}
