@@ -6,7 +6,6 @@ import { Track } from "./Track.js";
  * Handles event listeners for user interactions including station/track creation, selection, and dragging.
  * Maintains maps of stations and tracks for quick instance lookup.
  *
- * @class CanvasHandler
  * @property container - The main container element for the canvas
  * @property svg - The SVG element for rendering tracks
  * @property {HTMLElement} canvas - The canvas element for rendering stations
@@ -214,7 +213,6 @@ export class CanvasHandler {
         this.clearSelection();
         stationInstance.select();
     }
-    /** Select track */
     /**
      * Handles click events on track elements.
      * Deselects all other elements and selects the clicked track.
@@ -229,7 +227,6 @@ export class CanvasHandler {
         this.clearSelection();
         this.selectElement(this.trackInstances.get(track));
     }
-    /** Click canvas to create station */
     /**
      * Handles click events on empty canvas areas.
      * Creates a new station at the click position.
@@ -248,7 +245,6 @@ export class CanvasHandler {
             const tr = this.createTrack({ "startpoint": this.stationInstances.get(s1), "endpoint": s2 });
         }
     }
-    /** Deselect all selected stations and tracks */
     /**
      * Deselects all currently selected stations and tracks.
      * Removes the "selected" CSS class from all selected elements.
@@ -257,12 +253,6 @@ export class CanvasHandler {
         Array.from(this.selectedStationElements).forEach(s => this.stationInstances.get(s).deselect());
         Array.from(this.selectedTrackElements).forEach(tr => this.trackInstances.get(tr).deselect());
     }
-    /**
-     *
-     * @param coords
-     * @param select True to select station after creation. Default: false
-     * @returns
-     */
     /**
      * Creates a new station at the specified coordinates.
      * Registers the station in the stationInstances map for quick lookup.
@@ -291,11 +281,6 @@ export class CanvasHandler {
         return newTr;
     }
     /**
-     *
-     * @param elem
-     * @param clear True to clear entire selection before selecting element. Default: false.
-     */
-    /**
      * Selects a single element (station or track), optionally clearing all other selections first.
      *
      * @param {Station | Track} elem - The element to select (Station or Track instance)
@@ -305,15 +290,6 @@ export class CanvasHandler {
         if (clear)
             this.clearSelection();
         elem.select();
-    }
-    /**
-     * Set label visibility of all stations on the canvas to given value.
-     * @param val
-     */
-    setStationLabelVisibility(val) {
-        this.stationInstances.forEach(st => {
-            st.setLabelVisibility(val);
-        });
     }
 }
 //# sourceMappingURL=CanvasHandler.js.map

@@ -2,6 +2,7 @@
     --station-size: 20px;
     --station-color: white;
     --station-border-color: blue;
+    --station-label-display: block;
 
     --track-color: green;
     
@@ -109,6 +110,7 @@ p {
     height: 100%;
     width: 100%;
     pointer-events: none;
+    background-color: white;
 }
 
 #svg-layer {
