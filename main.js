@@ -1,4 +1,4 @@
-import { CanvasHandler} from "/out/CanvasHandler.js";
+import { CanvasHandler} from "./out/CanvasHandler.js";
 import {CSS_VARS} from "./constants.js";
 
 // DOM element references
