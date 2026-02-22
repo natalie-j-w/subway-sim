@@ -1,9 +1,9 @@
 import { Station } from "./Station";
 
 /**
- * Represents a 2D coordinate point on the canvas.
- * @property {number} x - The x-coordinate (horizontal position in pixels)
- * @property {number} y - The y-coordinate (vertical position in pixels)
+ * Represents a 2D coordinate point on the canvas (-> relative to canvas coordinates).
+ * @property {number} x - The x-coordinate 
+ * @property {number} y - The y-coordinate
  */
 export interface Coordinate {
     x: number,
@@ -11,11 +11,11 @@ export interface Coordinate {
 }
 
 /**
- * Represents coordinates for a track line segment.
- * @property {number} x1 - The x-coordinate of the starting point (horizontal position in pixels)
- * @property {number} y1 - The y-coordinate of the starting point (vertical position in pixels)
- * @property {number} x2 - The x-coordinate of the ending point (horizontal position in pixels)
- * @property {number} y2 - The y-coordinate of the ending point (vertical position in pixels)
+ * Represents coordinates for a track line segment on the canvas (-> relative to canvas coordinates).
+ * @property {number} x1 - The x-coordinate of the starting point
+ * @property {number} y1 - The y-coordinate of the starting point
+ * @property {number} x2 - The x-coordinate of the ending point
+ * @property {number} y2 - The y-coordinate of the ending point
  */
 export interface TrackCoordinate {
     x1: number,

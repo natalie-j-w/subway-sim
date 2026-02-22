@@ -1,6 +1,6 @@
 import {CSS_VARS} from "../constants.js"
 import { Station } from "./Station";
-import { Coordinate, TrackCoordinate, TrackStations } from "./Interfaces";
+import { TrackCoordinate, TrackStations } from "./Interfaces";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
