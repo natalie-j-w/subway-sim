@@ -53,7 +53,6 @@ export class Station {
         station.classList.add(CSS_VARS.STATION_CLASSNAME);
         label.classList.add(CSS_VARS.STATION_LABEL_CLASSNAME);
         label.textContent = this.name;
-        station.style.position = "absolute";
         station.style.left = `${this.coords.x}px`;
         station.style.top = `${this.coords.y}px`;
         station.appendChild(label);
@@ -137,7 +136,7 @@ export class Station {
      * @param {string} newName - The new name for the station
      */
     rename(newName) {
-        if (this.name === newName || newName == "")
+        if (this.name === newName || newName?.trim() == "" || !newName)
             return;
         else {
             console.log(`Renamed`, this, `from ${this.name} to ${newName}`);

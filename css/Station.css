@@ -22,16 +22,18 @@
     position: absolute;
     display: var(--station-label-display);
     bottom: -25px;
-    pointer-events:none;
-    user-select:none;
+    pointer-events: none;
+    user-select: none;
+    text-wrap: none;
+    white-space: nowrap;
 }
 
 .station-dot:hover {
-    border-color: darkblue;
+    border-color: #120084;
 }
 
 .station-dot.selected {
-    border-color: red;
+    border-color: #ff0000;
 }
 
 .station-dot.dragging {
