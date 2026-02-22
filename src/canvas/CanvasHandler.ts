@@ -1,7 +1,7 @@
-import { CSS_VARS } from "../constants.js";
+import { CSS_VARS } from "../../constants.js";
 import { Coordinate, TrackStations } from "./Interfaces"
 import { Station } from "./Station.js";
-import { Track } from "./Track.js";
+import { Track } from "../Track.js";
 
 /**
  * Manages all canvas interactions and DOM element creation for the subway simulator.

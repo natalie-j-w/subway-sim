@@ -1,6 +1,6 @@
-import {CSS_VARS} from "../constants.js"
+import {CSS_VARS} from "../../constants.js"
 import {Coordinate} from "./Interfaces.js"
-import { Track } from "./Track.js";
+import { Track } from "../Track.js";
 
 /**
  * Represents a subway station on the canvas.

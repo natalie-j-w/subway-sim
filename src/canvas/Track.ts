@@ -1,4 +1,4 @@
-import {CSS_VARS} from "../constants.js"
+import {CSS_VARS} from "../../constants.js"
 import { Station } from "./Station";
 import { TrackCoordinate, TrackStations } from "./Interfaces";
 
