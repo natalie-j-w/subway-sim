@@ -73,6 +73,7 @@ body {
 
 #size-slider {
     grid-column: 2;
+    width:fit-content;
 }
 
 h3 {

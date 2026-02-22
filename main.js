@@ -17,9 +17,14 @@ canvasHandler.showStationLabels = true;
 console.log(inputStationSize)
 inputStationSize.value = "20";
 outputStationSize.value = inputStationSize.value;
+canvasHandler.setStationLabelVisibility(inputShowLabels.checked);
 
 inputStationSize.oninput = () => {
     outputStationSize.value = inputStationSize.value;
     document.documentElement.style.setProperty("--station-size", `${inputStationSize.value}px`);
     console.log("Changed size to", document.documentElement.style.getPropertyValue("--station-size"))
+}
+
+inputShowLabels.oninput = () => {
+    canvasHandler.setStationLabelVisibility(inputShowLabels.checked);
 }
