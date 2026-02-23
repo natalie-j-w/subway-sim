@@ -1,4 +1,4 @@
-import { CSS_VARS } from "../constants.js";
+import { CSS_VARS } from "../../constants.js";
 import { Station } from "./Station.js";
 import { Track } from "./Track.js";
 /**
@@ -19,6 +19,9 @@ import { Track } from "./Track.js";
  * @property {Station} dragState.station - The station being dragged (if any)
  * @property {Coordinate} dragState.startPos - The starting position of the drag
  * @property {boolean} dragState.isDragging - Whether a drag is currently in progress
+ * @property {number} activeConfigurationID - Unique ID of currently loaded arrangement of stations and tracks on the canvas.
+ * @property {number} nextStationID - Unique ID of next created station. Increased by 1 when a station is created.
+ * @property {number} nextTrackID - Unique ID of next created track. Increased by 1 when a track is created.
  *
  * @example
  * const handler = new CanvasHandler(containerElement, svgElement, canvasElement);
@@ -43,6 +46,16 @@ export class CanvasHandler {
     selectedStationElements;
     /** Collection of currently selected track DOM elements */
     selectedTrackElements;
+    /** Unique ID of currently loaded arrangement of stations and tracks on the canvas. */
+    activeConfigurationID = 1;
+    /** Unique ID of next created station. Increased by 1 when a station is created.
+     * @todo Set to (largest id + 1) when loading existing configuration.
+    */
+    nextStationID = 1;
+    /** Unique ID of next created track. Increased by 1 when a track is created.
+     * @todo Set to (largest id + 1) when loading existing configuration.
+     */
+    nextTrackID = 1;
     /**
      * State object tracking the current drag operation on a station.
      * @property {Station} [station] - The station currently being dragged
@@ -70,7 +83,6 @@ export class CanvasHandler {
         const s1 = this.createStation({ x: 30, y: 30 });
         const s2 = this.createStation({ x: 100, y: 200 });
         const tr = this.createTrack({ "startpoint": s1, "endpoint": s2 });
-        console.log(s1, s2, tr);
         this.clearSelection();
         const resizeObserver = new ResizeObserver(() => {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
@@ -91,6 +103,20 @@ export class CanvasHandler {
             x: coords.x - bounds.left,
             y: coords.y - bounds.top
         };
+    }
+    get allStations() {
+        let stations = new Array();
+        for (let [elem, st] of this.stationInstances) {
+            stations.push(st);
+        }
+        return stations;
+    }
+    get allTracks() {
+        let tracks = new Array();
+        for (let [elem, st] of this.stationInstances) {
+            tracks.push(st);
+        }
+        return tracks;
     }
     /**
      * Sets up all event listeners for user interactions.
@@ -126,18 +152,11 @@ export class CanvasHandler {
             }
         });
         this.container.addEventListener('dblclick', e => {
-            // e.preventDefault();
             const target = e.target;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 const newName = prompt("New name for station:");
                 this.stationInstances.get(target).rename(newName);
             }
-            //   if (document.getSelection() && document.getSelection().empty) {
-            //         document.getSelection = undefined;
-            //     } else if (window.getSelection) {
-            //         const selection = window.getSelection();
-            //         selection.removeAllRanges();
-            //     }
         });
         /** Grab station */
         this.container.addEventListener('mousedown', e => {
@@ -270,6 +289,8 @@ export class CanvasHandler {
      */
     createStation(coords, select = false) {
         const newSt = new Station(this.canvas, coords);
+        newSt.id = this.nextStationID;
+        this.nextStationID++;
         this.stationInstances.set(newSt.element, newSt);
         if (select)
             this.selectElement(newSt, true);
@@ -284,6 +305,8 @@ export class CanvasHandler {
      */
     createTrack(stations) {
         const newTr = new Track(this.svg, stations);
+        newTr.id = this.nextTrackID;
+        this.nextTrackID++;
         this.trackInstances.set(newTr.element, newTr);
         return newTr;
     }

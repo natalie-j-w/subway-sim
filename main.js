@@ -1,4 +1,5 @@
-import { CanvasHandler} from "./out/CanvasHandler.js";
+import { CanvasHandler} from "./out/canvas/CanvasHandler.js";
+import { CanvasSerializer } from "./out/util/CanvasSerializer.js"
 import {CSS_VARS} from "./constants.js";
 
 // DOM element references
@@ -12,8 +13,10 @@ const inShowLabels = document.getElementById('in-show-station-labels');
 const inStationCol = document.getElementById('in-station-col');
 const inTrackCol = document.getElementById('in-track-col');
 const inCanvasCol = document.getElementById('in-canvas-col');
+const btnDownload = document.getElementById('btn-download')
 
 const canvasHandler = new CanvasHandler(container, svg, canvas);
+const canvasSerializer = new CanvasSerializer(canvasHandler);
 
 // Application state
 outStationSize.value = inStationSize.value;
@@ -39,6 +42,12 @@ inTrackCol.oninput = () => {
     document.documentElement.style.setProperty(CSS_VARS.TRACK_COLOR, String(inTrackCol.value));}
 
 inCanvasCol.oninput = () => {
-    console.log(inCanvasCol.value)
     canvasHandler.canvas.style.setProperty("background-color", String(inCanvasCol.value));
+}
+
+btnDownload.onclick = () => {
+    const json = canvasSerializer.canvasToJSON()
+    // console.log(json);
+    console.log(canvasHandler.allStations);
+    console.log(canvasSerializer.getTrackById(1));
 }

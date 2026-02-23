@@ -1,6 +1,6 @@
 import {CSS_VARS} from "../../constants.js"
 import {Coordinate} from "./Interfaces.js"
-import { Track } from "../Track.js";
+import { Track } from "./Track.js";
 
 /**
  * Represents a subway station on the canvas.
@@ -19,6 +19,9 @@ import { Track } from "../Track.js";
  * station.move({x: 150, y: 250});
  */
 export class Station {
+    /** Unique ID of the station */
+    id: number
+    /** DOM element containing and displaying the station */
     parent: HTMLElement;
     /** The DOM element representing the station */
     element: HTMLElement;

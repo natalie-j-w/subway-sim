@@ -1,4 +1,4 @@
-import { CSS_VARS } from "../constants.js";
+import { CSS_VARS } from "../../constants.js";
 /**
  * Represents a subway station on the canvas.
  * Handles creation, positioning, selection, and interaction of station elements.
@@ -16,6 +16,9 @@ import { CSS_VARS } from "../constants.js";
  * station.move({x: 150, y: 250});
  */
 export class Station {
+    /** Unique ID of the station */
+    id;
+    /** DOM element containing and displaying the station */
     parent;
     /** The DOM element representing the station */
     element;

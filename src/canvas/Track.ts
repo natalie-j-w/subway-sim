@@ -22,6 +22,8 @@ const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
  * track.select();
  */
 export class Track {
+    /** Unique ID of the track */
+    id: number;
     /** The main SVG line element representing the visible track */
     element: SVGLineElement;
     /** An invisible SVG line overlaid for easier selection and hover detection */

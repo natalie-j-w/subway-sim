@@ -1,7 +1,7 @@
 import { CSS_VARS } from "../../constants.js";
 import { Coordinate, TrackStations } from "./Interfaces"
 import { Station } from "./Station.js";
-import { Track } from "../Track.js";
+import { Track } from "./Track.js";
 
 /**
  * Manages all canvas interactions and DOM element creation for the subway simulator.
@@ -21,6 +21,9 @@ import { Track } from "../Track.js";
  * @property {Station} dragState.station - The station being dragged (if any)
  * @property {Coordinate} dragState.startPos - The starting position of the drag
  * @property {boolean} dragState.isDragging - Whether a drag is currently in progress
+ * @property {number} activeConfigurationID - Unique ID of currently loaded arrangement of stations and tracks on the canvas.
+ * @property {number} nextStationID - Unique ID of next created station. Increased by 1 when a station is created. 
+ * @property {number} nextTrackID - Unique ID of next created track. Increased by 1 when a track is created. 
  * 
  * @example
  * const handler = new CanvasHandler(containerElement, svgElement, canvasElement);
@@ -48,6 +51,19 @@ export class CanvasHandler {
     selectedStationElements: HTMLCollection;
     /** Collection of currently selected track DOM elements */
     selectedTrackElements: HTMLCollection;
+
+    /** Unique ID of currently loaded arrangement of stations and tracks on the canvas. */
+    activeConfigurationID: number = 1;
+
+    /** Unique ID of next created station. Increased by 1 when a station is created. 
+     * @todo Set to (largest id + 1) when loading existing configuration.
+    */
+    nextStationID: number = 1;
+
+    /** Unique ID of next created track. Increased by 1 when a track is created.
+     * @todo Set to (largest id + 1) when loading existing configuration.
+     */
+    nextTrackID: number = 1;
     
     /**
      * State object tracking the current drag operation on a station.
@@ -85,7 +101,6 @@ export class CanvasHandler {
         const s1 = this.createStation({x: 30, y: 30});
         const s2 = this.createStation({x: 100, y: 200});
         const tr = this.createTrack({"startpoint": s1, "endpoint": s2});
-        console.log(s1, s2, tr)
         this.clearSelection();
 
         const resizeObserver = new ResizeObserver(() => {
@@ -109,6 +124,22 @@ export class CanvasHandler {
             x: coords.x - bounds.left,
             y: coords.y - bounds.top
         };
+    }
+
+    get allStations(): Array<Station> {
+        let stations = new Array();
+        for (let [elem, st] of this.stationInstances) {
+            stations.push(st);
+        }
+        return stations;
+    }
+
+    get allTracks(): Array<Track> {
+        let tracks = new Array();
+        for (let [elem, st] of this.stationInstances) {
+            tracks.push(st);
+        }
+        return tracks;
     }
 
     /**
@@ -297,6 +328,8 @@ export class CanvasHandler {
      */
     createStation(coords: Coordinate, select: boolean = false): Station {
         const newSt = new Station(this.canvas, coords);
+        newSt.id = this.nextStationID;
+        this.nextStationID++;
         this.stationInstances.set(newSt.element, newSt);
         if (select) this.selectElement(newSt, true);
         return newSt;
@@ -311,6 +344,8 @@ export class CanvasHandler {
      */
     createTrack(stations: TrackStations): Track {
         const newTr = new Track(this.svg, stations);
+        newTr.id = this.nextTrackID;
+        this.nextTrackID++;
         this.trackInstances.set(newTr.element, newTr);
         return newTr;
     }

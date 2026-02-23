@@ -1,4 +1,4 @@
-import { CSS_VARS } from "../constants.js";
+import { CSS_VARS } from "../../constants.js";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 /**
  * Represents a track (line) connecting two subway stations.
@@ -18,6 +18,8 @@ const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
  * track.select();
  */
 export class Track {
+    /** Unique ID of the track */
+    id;
     /** The main SVG line element representing the visible track */
     element;
     /** An invisible SVG line overlaid for easier selection and hover detection */
