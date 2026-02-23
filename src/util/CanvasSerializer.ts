@@ -16,8 +16,8 @@ type StationObject = {
 /** Defines JSON fields for track serialization */
 type TrackObject = {
     id: number,
-    fromStationId: number,
-    toStationId: number,
+    from_station_id: number,
+    to_station_id: number,
     config_id: number
 }
 
@@ -54,8 +54,8 @@ export class CanvasSerializer {
         this.canvasHandler.trackInstances.forEach(tr => {
             const obj: TrackObject = {
                 id: tr.id,
-                fromStationId: tr.stations.startpoint.id,
-                toStationId: tr.stations.endpoint.id,
+                from_station_id: tr.stations.startpoint.id,
+                to_station_id: tr.stations.endpoint.id,
                 config_id: configID
             }
 

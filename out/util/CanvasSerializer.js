@@ -26,8 +26,8 @@ export class CanvasSerializer {
         this.canvasHandler.trackInstances.forEach(tr => {
             const obj = {
                 id: tr.id,
-                fromStationId: tr.stations.startpoint.id,
-                toStationId: tr.stations.endpoint.id,
+                from_station_id: tr.stations.startpoint.id,
+                to_station_id: tr.stations.endpoint.id,
                 config_id: configID
             };
             trackObjs.push(obj);
