@@ -19,7 +19,6 @@ export class CanvasSerializer {
                 x: Math.round(st.coords.x),
                 y: Math.round(st.coords.y),
                 name: st.name,
-                config_id: configID
             };
             stationObjs.push(obj);
         });
@@ -28,11 +27,15 @@ export class CanvasSerializer {
                 id: tr.id,
                 from_station_id: tr.stations.startpoint.id,
                 to_station_id: tr.stations.endpoint.id,
-                config_id: configID
             };
             trackObjs.push(obj);
         });
-        return JSON.stringify({ stations: stationObjs, tracks: trackObjs });
+        const config = {
+            id: configID,
+            stations: stationObjs,
+            tracks: trackObjs
+        };
+        return JSON.stringify(config);
     }
     getStationById(id) {
         return this.canvasHandler.allStations.filter(st => st.id == id)[0];

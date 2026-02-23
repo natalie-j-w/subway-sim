@@ -48,6 +48,5 @@ inCanvasCol.oninput = () => {
 btnDownload.onclick = () => {
     const json = canvasSerializer.canvasToJSON()
     // console.log(json);
-    console.log(canvasHandler.allStations);
-    console.log(canvasSerializer.getTrackById(1));
+    console.log(json);
 }

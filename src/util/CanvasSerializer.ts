@@ -10,7 +10,6 @@ type StationObject = {
     x: number,
     y: number,
     name: string,
-    config_id: number
 }
 
 /** Defines JSON fields for track serialization */
@@ -18,7 +17,13 @@ type TrackObject = {
     id: number,
     from_station_id: number,
     to_station_id: number,
-    config_id: number
+}
+
+/** Defines JSON fields for serialization of entire current canvas object configuration */
+type ObjectsConfiguration = {
+    id: number,
+    stations: Array<StationObject>,
+    tracks: Array<TrackObject>
 }
 
 export class CanvasSerializer {
@@ -45,7 +50,6 @@ export class CanvasSerializer {
                 x: Math.round(st.coords.x), 
                 y: Math.round(st.coords.y), 
                 name: st.name, 
-                config_id: configID
             };
 
             stationObjs.push(obj);
@@ -56,13 +60,18 @@ export class CanvasSerializer {
                 id: tr.id,
                 from_station_id: tr.stations.startpoint.id,
                 to_station_id: tr.stations.endpoint.id,
-                config_id: configID
             }
 
             trackObjs.push(obj);
         })
 
-        return JSON.stringify({stations: stationObjs, tracks: trackObjs});
+        const config: ObjectsConfiguration = {
+            id: configID,
+            stations: stationObjs,
+            tracks: trackObjs
+        }
+
+        return JSON.stringify(config);
     }
 
     getStationById(id: number): Station {
