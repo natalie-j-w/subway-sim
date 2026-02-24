@@ -30,7 +30,7 @@ export class Station {
     /** The current coordinate position of the station */
     coords: Coordinate;
     /** The name of the station */
-    name: string = "Unnamed";
+    name: string;
     /** Set of tracks connected to this station */
     tracks: Set<Track> = new Set();
     /** Set label visibility */
@@ -43,9 +43,10 @@ export class Station {
      * @param {Coordinate} coord - The initial position of the station on the canvas
      * @param {string} [name="Unnamed"] - The name of the station (optional, default: "Unnamed")
      */
-    constructor(parent: HTMLElement, coord: Coordinate, name: string = "Unnamed") {
+    constructor(parent: HTMLElement, coord: Coordinate, id?: number, name: string = "Unnamed") {
         this.parent = parent;
         this.coords = coord;
+        this.name = name;
         this.createDomElement();
     }
 

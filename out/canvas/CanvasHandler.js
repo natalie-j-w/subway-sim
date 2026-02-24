@@ -84,6 +84,7 @@ export class CanvasHandler {
         const s2 = this.createStation({ x: 100, y: 200 });
         const tr = this.createTrack({ "startpoint": s1, "endpoint": s2 });
         this.clearSelection();
+        console.log(this.selectedStationElements);
         const resizeObserver = new ResizeObserver(() => {
             this.svg.setAttribute('viewBox', `0 0 ${canvas.clientWidth} ${canvas.clientHeight}`);
         });
@@ -255,12 +256,10 @@ export class CanvasHandler {
      */
     handleCanvasClick(e) {
         const coord = this.getRelativeCoords({ x: e.pageX, y: e.pageY });
-        const s1 = this.selectedStationElements[0];
-        const s2 = this.createStation(coord, false);
-        this.clearSelection();
-        s2.select();
-        if (e.ctrlKey && this.selectedStationElements.length == 1) {
-            const tr = this.createTrack({ "startpoint": this.stationInstances.get(s1), "endpoint": s2 });
+        const selectedStation = this.selectedStationElements[0];
+        const newStation = this.createStation(coord, undefined, undefined, true);
+        if (selectedStation && e.ctrlKey && this.selectedStationElements.length == 1) {
+            this.createTrack({ "startpoint": this.stationInstances.get(selectedStation), "endpoint": newStation });
         }
     }
     /**
@@ -276,13 +275,17 @@ export class CanvasHandler {
      * Registers the station in the stationInstances map for quick lookup.
      *
      * @param {Coordinate} coords - The position where the station should be created
-     * @param {boolean} [select=false] - If true, automatically selects the newly created station
+     * @param {boolean} [select=false] - If true, automatically selects the newly created station. Default: false.
      * @returns {Station} The newly created Station instance
      */
-    createStation(coords, select = false) {
-        const newSt = new Station(this.canvas, coords);
-        newSt.id = this.nextStationID;
-        this.nextStationID++;
+    createStation(coords, id, name = undefined, select = false) {
+        const newSt = new Station(this.canvas, coords, undefined, name);
+        if (!id) {
+            newSt.id = this.nextStationID;
+            this.nextStationID++;
+        }
+        else
+            newSt.id = id;
         this.stationInstances.set(newSt.element, newSt);
         if (select)
             this.selectElement(newSt, true);
@@ -295,11 +298,16 @@ export class CanvasHandler {
      * @param {TrackStations} stations - Object containing startpoint and endpoint Station instances
      * @returns {Track} The newly created Track instance
      */
-    createTrack(stations) {
+    createTrack(stations, id) {
         const newTr = new Track(this.svg, stations);
-        newTr.id = this.nextTrackID;
-        this.nextTrackID++;
         this.trackInstances.set(newTr.element, newTr);
+        if (!id) {
+            newTr.id = this.nextTrackID;
+            this.nextTrackID++;
+        }
+        else
+            newTr.id = id;
+        // console.log("New Track", newTr)
         return newTr;
     }
     /**
@@ -312,6 +320,15 @@ export class CanvasHandler {
         if (clear)
             this.clearSelection();
         elem.select();
+    }
+    clearCanvas() {
+        this.stationInstances.forEach(st => st.delete());
+        this.trackInstances.forEach(tr => tr.delete());
+        this.clearSelection();
+        this.stationInstances.clear();
+        this.trackInstances.clear();
+        // this.nextStationID = 1;
+        // this.nextTrackID = 1;
     }
 }
 //# sourceMappingURL=CanvasHandler.js.map

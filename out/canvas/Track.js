@@ -37,13 +37,14 @@ export class Track {
      * @param {SVGElement} parent - The SVG container where the track will be rendered
      * @param {TrackStations} stations - Object containing startpoint and endpoint station instances
      */
-    constructor(parent, stations) {
+    constructor(parent, stations, id) {
         this.parent = parent;
         this.stations = stations;
         this.coords = {
             x1: this.stations.startpoint.coords.x, y1: this.stations.startpoint.coords.y,
             x2: this.stations.endpoint.coords.x, y2: this.stations.endpoint.coords.y
         };
+        this.id = id;
         this.element = this.createDomElement();
         this.element._trackInstance = this;
     }
