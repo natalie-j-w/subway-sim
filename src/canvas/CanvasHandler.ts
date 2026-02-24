@@ -127,19 +127,11 @@ export class CanvasHandler {
     }
 
     get allStations(): Array<Station> {
-        let stations = new Array();
-        for (let [elem, st] of this.stationInstances) {
-            stations.push(st);
-        }
-        return stations;
+        return Array.from(this.stationInstances.values());
     }
 
     get allTracks(): Array<Track> {
-        let tracks = new Array();
-        for (let [elem, st] of this.stationInstances) {
-            tracks.push(st);
-        }
-        return tracks;
+        return Array.from(this.trackInstances.values());
     }
 
     /**
