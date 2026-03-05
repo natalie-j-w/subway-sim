@@ -13,7 +13,8 @@ const inShowLabels = document.getElementById('in-show-station-labels');
 const inStationCol = document.getElementById('in-station-col');
 const inTrackCol = document.getElementById('in-track-col');
 const inCanvasCol = document.getElementById('in-canvas-col');
-const btnDownload = document.getElementById('btn-download')
+const btnDownload = document.getElementById('btn-download');
+const btnClear = document.getElementById('btn-clear');
 
 const canvasHandler = new CanvasHandler(container, svg, canvas);
 const canvasSerializer = new CanvasSerializer(canvasHandler);
@@ -47,8 +48,12 @@ inCanvasCol.oninput = () => {
 
 btnDownload.onclick = () => {
     const json = canvasSerializer.canvasToJSON()
-    const parsed = canvasSerializer.JSONtoCanvas(json);
+    canvasSerializer.JSONtoCanvas(json);
 
     console.log(json)
     
+}
+
+btnClear.onclick = () => {
+    canvasHandler.clearCanvas();
 }

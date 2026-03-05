@@ -86,17 +86,17 @@ export class CanvasSerializer {
         const config: ObjectsConfiguration = JSON.parse(json);
         this.canvasHandler.clearCanvas();
         
-        await new Promise(r => setTimeout(r, 400))
+        await new Promise(r => setTimeout(r, 800))
 
         config.stations.forEach(stObj => {
-            const newSt: Station = this.canvasHandler.createStation( 
+            this.canvasHandler.createStation( 
                 {x: stObj.x, y: stObj.y}, 
                 stObj.id, 
                 stObj.name);
         });
 
         config.tracks.forEach(trObj => {
-            const tr = this.canvasHandler.createTrack(
+            this.canvasHandler.createTrack(
                 {"startpoint": this.getStationById(trObj.from_station_id), 
                 "endpoint": this.getStationById(trObj.to_station_id)},
                 trObj.id);
