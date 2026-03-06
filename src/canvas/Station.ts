@@ -45,8 +45,9 @@ export class Station {
      */
     constructor(parent: HTMLElement, coord: Coordinate, id?: number, name: string = "Unnamed") {
         this.parent = parent;
+        this.id = id;
         this.coords = coord;
-        this.name = name;
+        this.name = String(id);
         this.createDomElement();
     }
 

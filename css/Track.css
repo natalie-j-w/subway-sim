@@ -4,6 +4,14 @@
     stroke-width: 2;
 }
 
+.track-line__label {
+    position: relative;
+    pointer-events: none;
+    user-select: none;
+    text-wrap: none;
+    white-space: nowrap;
+}
+
 .selection-line {
     pointer-events: stroke;
     stroke-width: 15;

@@ -2,6 +2,7 @@ import { CSS_VARS } from "../../constants.js";
 import { Coordinate, TrackStations } from "./Interfaces"
 import { Station } from "./Station.js";
 import { Track } from "./Track.js";
+import { getDistance } from "../util/UtilFunctions.js";
 
 /**
  * Manages all canvas interactions and DOM element creation for the subway simulator.
@@ -195,11 +196,8 @@ export class CanvasHandler {
             if (!this.dragState.station || !this.dragState.startPos) return;
 
             const currentPos = this.getRelativeCoords({x: e.pageX, y: e.pageY});
-            const dx = currentPos.x - this.dragState.startPos.x;
-            const dy = currentPos.y - this.dragState.startPos.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance > 3) {
+            if (getDistance(currentPos, this.dragState.startPos) > 3) {
                 if (!this.dragState.isDragging) {
                     this.dragState.isDragging = true;
                     this.dragState.station.startDrag();
@@ -317,11 +315,12 @@ export class CanvasHandler {
      * @returns {Station} The newly created Station instance
      */
     createStation(coords: Coordinate, id?: number, name: string = undefined, select: boolean = false): Station {
-        const newSt = new Station(this.canvas, coords, undefined, name);
+        let stID = id;
         if (!id) {
-            newSt.id = this.nextStationID;
+            stID = this.nextStationID;
             this.nextStationID++;
-        } else newSt.id = id;
+        } else stID = id;
+        const newSt = new Station(this.canvas, coords, stID, name);
         this.stationInstances.set(newSt.element, newSt);
         if (select) this.selectElement(newSt, true);
         return newSt;
