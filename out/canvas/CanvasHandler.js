@@ -199,12 +199,17 @@ export class CanvasHandler {
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 this.hoveredStation = null;
             }
+            else if (target.classList.contains(CSS_VARS.SELECTION_LINE_CLASSNAME)) {
+                this.hoveredTrack = null;
+            }
         });
         /** Delete station or track by hovering + del key */
         document.addEventListener('keydown', e => {
             if (e.key === "Delete" && this.hoveredStation) {
                 this.hoveredStation.delete();
+                this.allTracks.filter(tr => this.hoveredStation === tr.stations.startpoint || this.hoveredStation == tr.stations.endpoint).forEach(tr => tr.delete());
                 this.hoveredStation = null;
+                this.hoveredTrack = null;
             }
             if (e.key === "Delete" && this.hoveredTrack) {
                 this.hoveredTrack.delete();
@@ -223,7 +228,7 @@ export class CanvasHandler {
      */
     handleStationClick(station, e) {
         const stationInstance = this.stationInstances.get(station);
-        if (e.ctrlKey && this.selectedStationElements.length === 1) {
+        if (e.ctrlKey && this.selectedStationElements.length === 1 && !(Array.from(this.selectedStationElements).includes(station))) {
             const selected = this.selectedStationElements[0];
             this.createTrack({ "startpoint": this.stationInstances.get(selected), "endpoint": stationInstance });
         }
@@ -257,6 +262,7 @@ export class CanvasHandler {
         const selectedStation = this.selectedStationElements[0];
         const newStation = this.createStation(coord, undefined, undefined, true);
         if (selectedStation && e.ctrlKey && this.selectedStationElements.length == 1) {
+            console.log("new track");
             this.createTrack({ "startpoint": this.stationInstances.get(selectedStation), "endpoint": newStation });
         }
     }

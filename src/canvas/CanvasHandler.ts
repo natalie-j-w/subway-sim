@@ -227,6 +227,8 @@ export class CanvasHandler {
             const target = e.target as HTMLElement;
             if (target.classList.contains(CSS_VARS.STATION_CLASSNAME)) {
                 this.hoveredStation = null;
+            } else if (target.classList.contains(CSS_VARS.SELECTION_LINE_CLASSNAME)) {
+                this.hoveredTrack = null;
             }
         });
 
@@ -234,7 +236,9 @@ export class CanvasHandler {
         document.addEventListener('keydown', e => {
             if (e.key === "Delete" && this.hoveredStation) {
                 this.hoveredStation.delete();
+                this.allTracks.filter(tr => this.hoveredStation === tr.stations.startpoint || this.hoveredStation == tr.stations.endpoint).forEach(tr => tr.delete());
                 this.hoveredStation = null;
+                this.hoveredTrack = null;
             }
 
             if (e.key === "Delete" && this.hoveredTrack) {
@@ -255,7 +259,8 @@ export class CanvasHandler {
      */
     private handleStationClick(station: HTMLElement, e: MouseEvent): void {
         const stationInstance = this.stationInstances.get(station);
-        if (e.ctrlKey && this.selectedStationElements.length === 1) {
+
+        if (e.ctrlKey && this.selectedStationElements.length === 1 && !(Array.from(this.selectedStationElements).includes(station)))  {
             const selected = this.selectedStationElements[0];
             this.createTrack({"startpoint": this.stationInstances.get(selected as HTMLElement), "endpoint": stationInstance});
         }
@@ -289,8 +294,8 @@ export class CanvasHandler {
      */
     private handleCanvasClick(e: MouseEvent): void {
         const coord = this.getRelativeCoords({x: e.pageX, y: e.pageY});
-        const selectedStation = this.selectedStationElements[0];
-        const newStation = this.createStation(coord, undefined, undefined, true);
+        const selectedStation = this.selectedStationElements[0] as HTMLElement;
+        const newStation = this.createStation(coord, undefined, undefined, true);        
         
         if (selectedStation && e.ctrlKey && this.selectedStationElements.length == 1) {
             this.createTrack({"startpoint": this.stationInstances.get(selectedStation as HTMLElement), "endpoint": newStation})
