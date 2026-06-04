@@ -262,7 +262,6 @@ export class CanvasHandler {
         const selectedStation = this.selectedStationElements[0];
         const newStation = this.createStation(coord, undefined, undefined, true);
         if (selectedStation && e.ctrlKey && this.selectedStationElements.length == 1) {
-            console.log("new track");
             this.createTrack({ "startpoint": this.stationInstances.get(selectedStation), "endpoint": newStation });
         }
     }

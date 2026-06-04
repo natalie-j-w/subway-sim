@@ -50,8 +50,7 @@ btnDownload.onclick = () => {
     const json = canvasSerializer.canvasToJSON()
     canvasSerializer.JSONtoCanvas(json);
 
-    console.log(json)
-    
+    console.log(json)   
 }
 
 btnClear.onclick = () => {

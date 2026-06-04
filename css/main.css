@@ -77,6 +77,10 @@ body {
     width:fit-content;
 }
 
+#btn-download {
+    display: none;
+}
+
 h3 {
     margin-bottom: 15px;
     margin-top: 0;
